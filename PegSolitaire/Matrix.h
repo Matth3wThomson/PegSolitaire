@@ -7,15 +7,26 @@
 #define NULL 0
 #endif
 
+//TODO: Do all operators for matrix class.
+
+
 template<typename T>
 class Matrix {
 
 public:
+	//Default Values
 	static const int defaultX = 3;
 	static const int defaultY = 3;
 
+	//Construction
 	Matrix(const int xSize = defaultX, const int ySize = defaultY, const T& value = NULL);
+	Matrix(const Matrix<T>& src);
 	~Matrix(void);
+	Matrix<T>& operator=(const Matrix<T>& rhs);
+
+	//Arithmetic
+	template<typename E>
+	friend Matrix<E> operator*(const Matrix<E>& a, const Matrix<E>& b);
 
 	//Insertion
 	inline void setElement(const int x, const int y, const T& elem){ mat[x][y] = elem; };

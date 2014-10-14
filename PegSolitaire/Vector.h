@@ -11,7 +11,9 @@ public:
 	static const int defaultSize = 5;
 
 	Vector(const int size = defaultSize, const T& value = NULL);
+	Vector(const Vector<T>& rhs);
 	~Vector(void);
+	Vector<T>& operator=(const Matrix<T>& rhs);
 
 	//Insertion
 	inline void insertElement(const T& element, const int location){ array[location] = element; };
