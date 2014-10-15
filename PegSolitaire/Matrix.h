@@ -7,7 +7,11 @@
 #define NULL 0
 #endif
 
-//TODO: Do all operators for matrix class.
+//TODO: 
+//		-Do all operators for matrix class.
+//		-Evaulate pass by reference used... Lots of matrices are bools (slower to pass 4 bytes than
+//		 1 bit)
+
 
 
 template<typename T>
