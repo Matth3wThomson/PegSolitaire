@@ -13,11 +13,11 @@ Matrix<T>::Matrix(const Matrix<T>& src):
 x(src.x), y(src.y)
 {
 	mat = new T*[x];
-	for (int i=0; i< x; ++i){
-		mat[i] = new T[y];
-		memset(cells[i], 0, (y * sizeof(T)));
+	for(int i = 0; i < x; ++i)	
+	{
+			mat[i] = new T[y_size];
+			memcpy_s(mat[i], (y * sizeof(T)), src.mat[i], (y * sizeof(T)));
 	}
-
 }
 
 template<typename T>

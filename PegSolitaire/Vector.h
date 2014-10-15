@@ -16,11 +16,11 @@ public:
 	Vector<T>& operator=(const Matrix<T>& rhs);
 
 	//Insertion
-	inline void insertElement(const T& element, const int location){ array[location] = element; };
+	inline void insertElement(const T& element, const int location){ arr[location] = element; };
 
 	//Access
-	inline T& at(const int location){ return array[location]; };
-	inline T& operator[](int location){ return array[location]; };
+	inline T& at(const int location){ return arr[location]; };
+	inline T& operator[](int location){ return arr[location]; };
 
 	//Size of Vector
 	inline int size() const{ return containerSize; };
@@ -33,11 +33,10 @@ public:
 	};
 
 private:
-	void init(const int size, const T& value = 0);
 	int containerSize;
 
-	//Array
-	T* array;
+	//arr
+	T* arr;
 };
 
 #include "VectorDefinition.h"

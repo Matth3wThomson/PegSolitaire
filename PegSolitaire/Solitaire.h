@@ -10,7 +10,7 @@
 
 	TODO:
 		-Put matricies onto the stack, rather than heap. Use pass by
-		 reference in existing methods to facilitate this change.
+		 reference in existing methods to facilitate this change?
 		-Having indexMatrix and State Vector computed in the same function
 		 will be much quicker!
 		-Make sure that all method names are of the same style!
