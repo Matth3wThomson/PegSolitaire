@@ -2,10 +2,10 @@
 
 template<typename T>
 Vector<T>::Vector(const int size, const T& value):
-	containerSize(size)
+	container_size(size)
 {
-	this->arr = new T[containerSize];
-	memset(this->arr, value, (containerSize * sizeof(T)));
+	this->arr = new T[container_size];
+	memset(this->arr, value, (container_size * sizeof(T)));
 }
 
 template<typename T>
@@ -16,10 +16,10 @@ Vector<T>::~Vector(void)
 
 template<typename T>
 Vector<T>::Vector(const Vector<T>& rhs):
-containerSize(rhs.containerSize)
+container_size(rhs.container_size)
 {
 	arr = new T[];
-	memcpy_s(arr, (containerSize*sizeof(T)), rhs.arr, (containerSize*sizeof(T)));
+	memcpy_s(arr, (container_size*sizeof(T)), rhs.arr, (container_size*sizeof(T)));
 }
 
 template<typename T>
@@ -30,11 +30,11 @@ Vector<T>& Vector<T>::operator=(const Matrix<T>& rhs){
 	delete[] arr;
 
 	//allocate new memory
-	arr = new T[containerSize];
+	arr = new T[container_size];
 	memset(this->arr, 0, (size * sizeof(T)));
 	
 	//Copy Values
-	for (int i=0; i<rhs.containerSize; ++i){
+	for (int i=0; i<rhs.container_size; ++i){
 		arr[i] = rhs[i];
 	}
 }

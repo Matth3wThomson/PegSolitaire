@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 
 #ifndef NULL
@@ -11,6 +12,7 @@
 //		-Do all operators for matrix class.
 //		-Evaulate pass by reference used... Lots of matrices are bools (slower to pass 4 bytes than
 //		 1 bit)
+//		-How many mathematical functions are required? The more we add, the less general the class is?
 
 
 
@@ -29,27 +31,41 @@ public:
 	Matrix<T>& operator=(const Matrix<T>& rhs);
 
 	//Arithmetic
+	T determinant();
+	Matrix<T> inverse();
+	Matrix<T> transpose();
+	
 	template<typename E>
-	friend Matrix<E> operator*(const Matrix<E>& a, const Matrix<E>& b);
+	friend Matrix<E> operator*(const Matrix<E>& lhs, const Matrix<E>& rhs);
+	
+	template<typename E>
+	friend Matrix<E> operator+(const Matrix<E>& lhs, const Matrix<E>& rhs);
+
+	template<typename E>
+	friend Matrix<E> operator-(const Matrix<E>& lhs, const Matrix<E>& rhs);
+
+	template<typename E>
+	friend Matrix<E> operator/(const Matrix<E>& lhs, const Matrix<E>& rhs);
+	
 
 	//Insertion
-	inline void setElement(const int x, const int y, const T& elem){ mat[x][y] = elem; };
+	inline void set_element(const int x, const int y, const T& elem){ mat[x][y] = elem; };
 
 	//Access
-	inline T& getElement(const int x, const int y){ return mat[x][y]; };
+	inline T& get_element(const int x, const int y){ return mat[x][y]; };
 	inline T* operator[](const int location) const{ return mat[location]; };
 
 	//Size operations
-	inline int getXSize() const{ return x; };
-	inline int getYSize() const{ return y; };
+	inline int get_x_dim() const{ return x; };
+	inline int get_y_dim() const{ return y; };
 
-	inline int getHeight() const{ return x; };
-	inline int getWidth() const { return y; };
+	inline int get_height() const{ return x; };
+	inline int get_width() const { return y; };
 
 	//Display
 	friend std::ostream& operator<<(std::ostream& os, const Matrix<T>& m){
 		for (int i=0; i<m.x; ++i){
-			for (int j=0; j<m.y; ++j) os << m[i][j] << " ";
+			for (int j=0; j<m.y; ++j) os << std::right << std::setw(2) <<  m[i][j] << " ";
 			os << std::endl;
 		}
 		return os;

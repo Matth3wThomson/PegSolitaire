@@ -7,14 +7,27 @@ Solitaire::Solitaire(bool Eng)
 	else boardShape = CreateEurBoard();
 
 	indexMatrix = CreateIndexMat(*boardShape);
-	stateVector = CreateStateVec(*indexMatrix);
+	stateVector = CreateStateVec(*boardShape);
 	jumpMatrix = CreateJumpMat(*boardShape, *indexMatrix, *stateVector);
+
+	/*std::cout << *indexMatrix;
+	std::cout << *stateVector << std::endl;
+	std::cout << *jumpMatrix << std::endl;*/
+}
+
+Solitaire::Solitaire(Matrix<bool>& boardShape){
+	//Perform deep copy
+	this->boardShape = new Matrix<bool>(boardShape);
+
+	indexMatrix = CreateIndexMat(*this->boardShape);
+	stateVector = CreateStateVec(*this->boardShape);
+
+	jumpMatrix = CreateJumpMat(*this->boardShape, *this->indexMatrix, *this->stateVector);
 
 	std::cout << *indexMatrix;
 	std::cout << *stateVector << std::endl;
 	std::cout << *jumpMatrix << std::endl;
 }
-
 
 Solitaire::~Solitaire(void)
 {
@@ -27,8 +40,8 @@ Solitaire::~Solitaire(void)
 Matrix<bool>* Solitaire::CreateEngBoard(){
 	Matrix<bool>* temp = new Matrix<bool>(7, 7, 0);
 
-	for (int i=0; i<temp->getXSize(); ++i){
-		for (int j=0; j<temp->getYSize(); ++j){
+	for (int i=0; i<temp->get_x_dim(); ++i){
+		for (int j=0; j<temp->get_y_dim(); ++j){
 			if (!( ((i<2) || (i>4)) && ((j<2) || (j>4)) ))
 				(*temp)[i][j] = true;
 		}
@@ -49,12 +62,12 @@ Matrix<bool>* Solitaire::CreateEurBoard(){
 }
 
 Matrix<int>* Solitaire::CreateIndexMat(const Matrix<bool>& boardShape){
-	Matrix<int>* temp = new Matrix<int>(boardShape.getXSize(), boardShape.getYSize(), -1);
+	Matrix<int>* temp = new Matrix<int>(boardShape.get_x_dim(), boardShape.get_y_dim(), -1);
 
 	int count = 0;
 
-	for (int i=0; i<boardShape.getXSize(); ++i){
-		for (int j=0; j<boardShape.getYSize(); ++j){
+	for (int i=0; i<boardShape.get_x_dim(); ++i){
+		for (int j=0; j<boardShape.get_y_dim(); ++j){
 			if (boardShape[i][j]){
 				(*temp)[i][j] = count++;
 			}
@@ -63,17 +76,17 @@ Matrix<int>* Solitaire::CreateIndexMat(const Matrix<bool>& boardShape){
 	return temp;
 }
 
-Vector<bool>* Solitaire::CreateStateVec(const Matrix<int>& indexMatrix){
+
+Vector<bool>* Solitaire::CreateStateVec(const Matrix<bool>& boardShape){
 	int count = 0;
 
-	for (int i=0; i<indexMatrix.getXSize(); ++i){
-		for (int j=0; j<indexMatrix.getYSize(); ++j){
-			if (indexMatrix[i][j] >= 0) ++count;
+	for (int i=0; i<boardShape.get_x_dim(); ++i){
+		for (int j=0; j<boardShape.get_y_dim(); ++j){
+			if (boardShape[i][j]) ++count;
 		}
 	}
 
 	Vector<bool>* temp = new Vector<bool>(count, true);
-	std::cout << count/2 << std::endl;
 	(*temp)[count/2] = false;
 
 	return temp;
@@ -81,37 +94,37 @@ Vector<bool>* Solitaire::CreateStateVec(const Matrix<int>& indexMatrix){
 
 
 Matrix<int>* Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matrix<int>& indexMatrix, const Vector<bool>& stateVector){
-	
+
 	//Create a vector to store all the jumps possible on the board
 	std::vector<jump> jumps = std::vector<jump>();
 	jumps.reserve(stateVector.size() * 4);
 
 	//Go through the board shape looking for possible jumps
-	for (int i=0; i<boardShape.getXSize(); ++i){
-		for (int j=0; j<boardShape.getYSize(); ++j){
+	for (int i=0; i<boardShape.get_x_dim(); ++i){
+		for (int j=0; j<boardShape.get_y_dim(); ++j){
 			//If the location exists
 			if (boardShape[i][j]){
 				//Check jump right possible
-				if (j+2<boardShape.getYSize())
-				if (boardShape[i][j+1] && boardShape[i][j+2])
-					//TODO: Not sure if this works?
-					jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i][j+1], indexMatrix[i][j+2]));
+				if (j+2<boardShape.get_y_dim())
+					if (boardShape[i][j+1] && boardShape[i][j+2])
+						//TODO: Not sure if this works?
+							jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i][j+1], indexMatrix[i][j+2]));
 
 				//Check jump left possible
 				if (j-2>-1)
-				if (boardShape[i][j-1] && boardShape[i][j-2])
-					jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i][j-1], indexMatrix[i][j-2]));
-				
+					if (boardShape[i][j-1] && boardShape[i][j-2])
+						jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i][j-1], indexMatrix[i][j-2]));
+
 				//Check jump down possible
-				if (i+2<boardShape.getXSize())
-				if (boardShape[i+1][j] && boardShape[i+2][j])
-					jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i+1][j], indexMatrix[i+2][j]));
+				if (i+2<boardShape.get_x_dim())
+					if (boardShape[i+1][j] && boardShape[i+2][j])
+						jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i+1][j], indexMatrix[i+2][j]));
 
 				//Check jump up possible
 				if (i-2>-1)
-				if (boardShape[i-1][j] && boardShape[i-2][j])
-					jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i-1][j], indexMatrix[i-2][j]));
-				
+					if (boardShape[i-1][j] && boardShape[i-2][j])
+						jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i-1][j], indexMatrix[i-2][j]));
+
 			}
 		}
 	}
@@ -136,11 +149,11 @@ Matrix<int>* Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matr
 }
 
 void Solitaire::PrintBoard(std::ostream& os) const{
-	for (int i=0; i<indexMatrix->getXSize(); ++i){
-		for (int j=0; j<indexMatrix->getYSize(); ++j){
+	for (int i=0; i<indexMatrix->get_x_dim(); ++i){
+		for (int j=0; j<indexMatrix->get_y_dim(); ++j){
 			if ((*boardShape)[i][j]) os << (*stateVector)[(*indexMatrix)[i][j]];
-			else os << ",";
-			os << " ";
+			else os << " ";
+			os << ",";
 		}
 		os << "\n";
 	}

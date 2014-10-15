@@ -16,14 +16,14 @@ public:
 	Vector<T>& operator=(const Matrix<T>& rhs);
 
 	//Insertion
-	inline void insertElement(const T& element, const int location){ arr[location] = element; };
+	inline void insert_element(const T& element, const int location){ arr[location] = element; };
 
 	//Access
 	inline T& at(const int location){ return arr[location]; };
 	inline T& operator[](int location){ return arr[location]; };
 
 	//Size of Vector
-	inline int size() const{ return containerSize; };
+	inline int size() const{ return container_size; };
 
 	//Display
 	friend std::ostream& operator<<(std::ostream& os, Vector<T>& v){
@@ -33,7 +33,7 @@ public:
 	};
 
 private:
-	int containerSize;
+	int container_size;
 
 	//arr
 	T* arr;

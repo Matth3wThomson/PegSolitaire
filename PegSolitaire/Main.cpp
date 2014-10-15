@@ -21,7 +21,10 @@ int main(){
 
 		std::cout << board;*/
 
-		Solitaire b(1);
+		Matrix<bool> board(2, 3, true);
+
+		/*Solitaire b(1);*/
+		Solitaire b(board);
 		
 		std::cout << b;
 
