@@ -8,11 +8,13 @@
 #define NULL 0
 #endif
 
-//TODO: 
-//		-Do all operators for matrix class.
-//		-Evaulate pass by reference used... Lots of matrices are bools (slower to pass 4 bytes than
-//		 1 bit)
-//		-How many mathematical functions are required? The more we add, the less general the class is?
+/*TODO: 
+		-Do all operators for matrix class.
+		-Evaulate pass by reference used... Lots of matrices are bools (slower to pass 4 bytes than
+		 1 bit) 
+		-Finish mathematical operators and test them!
+*/
+
 
 
 

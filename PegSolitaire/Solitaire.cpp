@@ -87,6 +87,8 @@ Vector<bool>* Solitaire::CreateStateVec(const Matrix<bool>& boardShape){
 	}
 
 	Vector<bool>* temp = new Vector<bool>(count, true);
+
+	//TODO: Figure out what to do about this.
 	(*temp)[count/2] = false;
 
 	return temp;
@@ -106,25 +108,19 @@ Matrix<int>* Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matr
 			if (boardShape[i][j]){
 				//Check jump right possible
 				if (j+2<boardShape.get_y_dim())
-					if (boardShape[i][j+1] && boardShape[i][j+2])
-						//TODO: Not sure if this works?
-							jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i][j+1], indexMatrix[i][j+2]));
+					if (boardShape[i][j+1] && boardShape[i][j+2]){
+						//If so, push back jump right, and jump left from landed spot
+						jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i][j+1], indexMatrix[i][j+2]));
+						jumps.push_back(jump(indexMatrix[i][j+2], indexMatrix[i][j+1], indexMatrix[i][j]));
+					}
 
-				//Check jump left possible
-				if (j-2>-1)
-					if (boardShape[i][j-1] && boardShape[i][j-2])
-						jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i][j-1], indexMatrix[i][j-2]));
-
-				//Check jump down possible
-				if (i+2<boardShape.get_x_dim())
-					if (boardShape[i+1][j] && boardShape[i+2][j])
-						jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i+1][j], indexMatrix[i+2][j]));
-
-				//Check jump up possible
-				if (i-2>-1)
-					if (boardShape[i-1][j] && boardShape[i-2][j])
-						jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i-1][j], indexMatrix[i-2][j]));
-
+					//Check jump down possible
+					if (i+2<boardShape.get_x_dim())
+						if (boardShape[i+1][j] && boardShape[i+2][j]){
+							//If so, push back jump down, and jump up from landed spot
+							jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i+1][j], indexMatrix[i+2][j]));
+							jumps.push_back(jump(indexMatrix[i+2][j], indexMatrix[i+1][j], indexMatrix[i][j]));
+						}
 			}
 		}
 	}
@@ -142,8 +138,6 @@ Matrix<int>* Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matr
 		(*jumpMat)[jumps[i].endIndex][i]--;
 
 	}
-
-	std::cout << *jumpMat;
 
 	return jumpMat;
 }
