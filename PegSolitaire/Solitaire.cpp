@@ -110,8 +110,9 @@ Matrix<int>* Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matr
 				if (j+2<boardShape.get_y_dim())
 					if (boardShape[i][j+1] && boardShape[i][j+2]){
 						//If so, push back jump right, and jump left from landed spot
+						//TODO: Dont add all to vector, just flip when setting matrix
 						jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i][j+1], indexMatrix[i][j+2]));
-						jumps.push_back(jump(indexMatrix[i][j+2], indexMatrix[i][j+1], indexMatrix[i][j]));
+						//jumps.push_back(jump(indexMatrix[i][j+2], indexMatrix[i][j+1], indexMatrix[i][j]));
 					}
 
 					//Check jump down possible
@@ -119,23 +120,34 @@ Matrix<int>* Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matr
 						if (boardShape[i+1][j] && boardShape[i+2][j]){
 							//If so, push back jump down, and jump up from landed spot
 							jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i+1][j], indexMatrix[i+2][j]));
-							jumps.push_back(jump(indexMatrix[i+2][j], indexMatrix[i+1][j], indexMatrix[i][j]));
+							//jumps.push_back(jump(indexMatrix[i+2][j], indexMatrix[i+1][j], indexMatrix[i][j]));
 						}
 			}
 		}
 	}
 
 	//Step 2: Fill matrix with values dependent on indexMatrix and boardShape
-	Matrix<int>* jumpMat = new Matrix<int>(stateVector.size(), jumps.size());
+	Matrix<int>* jumpMat = new Matrix<int>(stateVector.size(), jumps.size()*2);
 
+	//TODO: Inefficient, work out whether format is important or not.
+	//		currently accessed in column major order... very slow!
+	int location = -1;
 	for (unsigned int i=0; i<jumps.size(); ++i){
 
+		//Jump from start to end
 		//1 if jump i removes peg at hole
-		(*jumpMat)[jumps[i].startIndex][i]++;
-		(*jumpMat)[jumps[i].midIndex][i]++;
+		(*jumpMat)[jumps[i].startIndex][++location]++;
+		(*jumpMat)[jumps[i].midIndex][location]++;
 
 		//-1 if jump i places peg at hole
-		(*jumpMat)[jumps[i].endIndex][i]--;
+		(*jumpMat)[jumps[i].endIndex][location]--;
+
+		////Jump from end to start
+		////And reverse!
+		(*jumpMat)[jumps[i].endIndex][++location]++;
+		(*jumpMat)[jumps[i].midIndex][location]++;
+
+		(*jumpMat)[jumps[i].startIndex][location]--;
 
 	}
 
