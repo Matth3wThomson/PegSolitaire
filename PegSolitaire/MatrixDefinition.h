@@ -21,6 +21,16 @@ Matrix<T>::Matrix(const Matrix<T>& src):
 }
 
 template<typename T>
+Matrix<T>::Matrix(Matrix&& rval):
+mat(rval.mat), x(rval.x), y(rval.y){
+	//We must nullify the other object, as the move constructor is called
+	//when the original object is uninitialized
+	rval.mat = 0;
+	rval.x = 0;
+	rval.y = 0;
+}
+
+template<typename T>
 Matrix<T>::~Matrix(){
 	for (int i = 0; i<x; i++){
 		delete[] mat[i];
@@ -57,6 +67,15 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T>& rhs){
 
 	return *this;
 }
+
+template<typename T>
+Matrix<T>& Matrix<T>::operator=(Matrix<T>&& rval){
+	std::swap(mat, rval.mat);
+	std::swap(x, rval.x);
+	std::swap(y, rval.y);
+	return *this;
+}
+
 
 //TODO: Untested
 template<typename T>

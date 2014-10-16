@@ -15,8 +15,20 @@
 			-Having indexMatrix and State Vector computed in the same function
 			 will be much quicker
 		-Make sure that all method names are of the same style
-		-Find out wether use of STL::vector is allowed
-		-Jump matrix is calculated irrespective of whether peg holes are filled?
+
+	QUESTIONS:
+		-Does the orientation of the jump matrix matter? When creating, column by 
+		 row is very slow. MAKE COMMENT
+		-Is there an equation to know the maximum size of a jump matrix (no of jumps)? ASK LEFT
+		-Is using uncaught exeptions in matrix classes a good idea (non uniform matrix addition)?
+			-Vectors of different sizes?
+		-What mathematical functions are necessary for our matrix classes PRIORITIZE
+			-Complete class for better functionality?
+			-Just what we need for smaller/more efficient codebase?
+		-When initializing your state vector, should you set values?
+		-Passing by reference to static functions good practice? will be quicker than individual
+		 returning pointers. 
+		-For the game, is coordinates necessary, as indices are nicer...
 */
 
 class Solitaire
@@ -28,14 +40,16 @@ public:
 	~Solitaire(void);
 	
 	//Creates given boards on the heap
-	static Matrix<bool>* CreateEurBoard();
-	static Matrix<bool>* CreateEngBoard();
+	static Matrix<bool> CreateEurBoard();
+	static Matrix<bool> CreateEngBoard();
 	
-	static Matrix<int>* CreateIndexMat(const Matrix<bool>& boardShape);
-	static Vector<bool>* CreateStateVec(const Matrix<bool>& boardShape);
+	static Matrix<int> CreateIndexMat(const Matrix<bool>& boardShape);
+	static Vector<bool> CreateStateVec(const Matrix<bool>& boardShape);
 
-	static Matrix<int>* CreateJumpMat(const Matrix<bool>& boardShape,
+	static Matrix<int> CreateJumpMat(const Matrix<bool>& boardShape,
 		const Matrix<int>& indexMatrix, const Vector<bool>& stateVector);
+
+	bool EOG();
 
 	friend std::ostream& operator<<(std::ostream& os, const Solitaire& s){
 		s.PrintBoard(os);
@@ -44,17 +58,17 @@ public:
 
 private:
 
-	Matrix<bool>* boardShape;
-	Vector<bool>* stateVector;
-	Matrix<int>* indexMatrix;
-	Matrix<int>* jumpMatrix;
+	Matrix<bool> boardShape;
+	Vector<bool> stateVector;
+	Matrix<int> indexMatrix;
+	Matrix<int> jumpMatrix;
 
-	struct jump {
+	/*struct jump {
 		int startIndex, midIndex, endIndex;
 
 		jump(int start = 0, int mid = 0, int end = 0):
 		startIndex(start), midIndex(mid), endIndex(end){ };
-	};
+	};*/
 
 	void PrintBoard(std::ostream& os) const;
 

@@ -23,7 +23,14 @@ container_size(rhs.container_size)
 }
 
 template<typename T>
-Vector<T>& Vector<T>::operator=(const Matrix<T>& rhs){
+Vector<T>::Vector(Vector<T>&& rval):
+arr(rval.arr), container_size(rval.container_size){
+	rval.arr = 0;
+	rval.container_size = 0;
+}
+
+template<typename T>
+Vector<T>& Vector<T>::operator=(const Vector<T>& rhs){
 	if (this == &rhs) return (*this);
 
 	//Release old memory
@@ -31,10 +38,18 @@ Vector<T>& Vector<T>::operator=(const Matrix<T>& rhs){
 
 	//allocate new memory
 	arr = new T[container_size];
-	memset(this->arr, 0, (size * sizeof(T)));
+	memset(this->arr, 0, (container_size * sizeof(T)));
 	
 	//Copy Values
 	for (int i=0; i<rhs.container_size; ++i){
-		arr[i] = rhs[i];
+		arr[i] = rhs.arr[i];
 	}
+}
+
+template<typename T>
+Vector<T>& Vector<T>::operator=(Vector<T>&& rval){
+	std::swap(arr, rval.arr);
+	std::swap(container_size, rval.container_size);
+
+	return *this;
 }

@@ -28,9 +28,11 @@ public:
 
 	//Construction
 	Matrix(const int xSize = defaultX, const int ySize = defaultY, const T& value = NULL);
-	Matrix(const Matrix<T>& src);
+	Matrix(const Matrix<T>& src); 
+	Matrix(Matrix<T>&& rval); //<-- Move constructor... AMAZING!
 	~Matrix(void);
 	Matrix<T>& operator=(const Matrix<T>& rhs);
+	Matrix<T>& operator=(Matrix<T>&& rval); //<-- Move assignment operator
 
 	//Arithmetic
 	T determinant();
@@ -67,7 +69,7 @@ public:
 	//Display
 	friend std::ostream& operator<<(std::ostream& os, const Matrix<T>& m){
 		for (int i=0; i<m.x; ++i){
-			for (int j=0; j<m.y; ++j) os << std::right << std::setw(2) <<  m[i][j] << " ";
+			for (int j=0; j<m.y; ++j) os << std::right << std::setw(3) <<  m[i][j];
 			os << std::endl;
 		}
 		return os;

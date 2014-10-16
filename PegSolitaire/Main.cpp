@@ -24,10 +24,14 @@ int main(){
 		Matrix<bool> board(2, 3, true);
 
 		Solitaire a(true);
-		Solitaire b(board);
-		
+		/*Solitaire b(board);*/
+
+		/*while (!a.EOG(){
+
+		}*/
+
 		std::cout << a;
-		std::cout << b;
+		/*std::cout << b;*/
 
 		system("pause");
 	}
