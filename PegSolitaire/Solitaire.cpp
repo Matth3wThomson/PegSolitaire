@@ -10,9 +10,9 @@ Solitaire::Solitaire(bool Eng)
 	stateVector = CreateStateVec(*boardShape);
 	jumpMatrix = CreateJumpMat(*boardShape, *indexMatrix, *stateVector);
 
-	/*std::cout << *indexMatrix;
+	std::cout << *indexMatrix;
 	std::cout << *stateVector << std::endl;
-	std::cout << *jumpMatrix << std::endl;*/
+	std::cout << *jumpMatrix << std::endl;
 }
 
 Solitaire::Solitaire(Matrix<bool>& boardShape){
@@ -98,8 +98,12 @@ Vector<bool>* Solitaire::CreateStateVec(const Matrix<bool>& boardShape){
 Matrix<int>* Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matrix<int>& indexMatrix, const Vector<bool>& stateVector){
 
 	//Create a vector to store all the jumps possible on the board
-	std::vector<jump> jumps = std::vector<jump>();
-	jumps.reserve(stateVector.size() * 4);
+	std::vector<int> jumpIndices = std::vector<int>();
+
+	//Up to 4 * locations worth of jumps
+	//3 ints per 2 jumps = 1.5
+	// 4 * 1.5  = 6
+	jumpIndices.reserve(stateVector.size() * 6);
 
 	//Go through the board shape looking for possible jumps
 	for (int i=0; i<boardShape.get_x_dim(); ++i){
@@ -110,44 +114,46 @@ Matrix<int>* Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matr
 				if (j+2<boardShape.get_y_dim())
 					if (boardShape[i][j+1] && boardShape[i][j+2]){
 						//If so, push back jump right, and jump left from landed spot
-						//TODO: Dont add all to vector, just flip when setting matrix
-						jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i][j+1], indexMatrix[i][j+2]));
-						//jumps.push_back(jump(indexMatrix[i][j+2], indexMatrix[i][j+1], indexMatrix[i][j]));
+						jumpIndices.push_back(indexMatrix[i][j]);
+						jumpIndices.push_back(indexMatrix[i][j+1]);
+						jumpIndices.push_back(indexMatrix[i][j+2]);
 					}
 
 					//Check jump down possible
 					if (i+2<boardShape.get_x_dim())
 						if (boardShape[i+1][j] && boardShape[i+2][j]){
 							//If so, push back jump down, and jump up from landed spot
-							jumps.push_back(jump(indexMatrix[i][j], indexMatrix[i+1][j], indexMatrix[i+2][j]));
-							//jumps.push_back(jump(indexMatrix[i+2][j], indexMatrix[i+1][j], indexMatrix[i][j]));
+							jumpIndices.push_back(indexMatrix[i][j]);
+							jumpIndices.push_back(indexMatrix[i+1][j]);
+							jumpIndices.push_back(indexMatrix[i+2][j]);
+
 						}
 			}
 		}
 	}
 
 	//Step 2: Fill matrix with values dependent on indexMatrix and boardShape
-	Matrix<int>* jumpMat = new Matrix<int>(stateVector.size(), jumps.size()*2);
+	Matrix<int>* jumpMat = new Matrix<int>(stateVector.size(), jumpIndices.size()/3*2);
 
 	//TODO: Inefficient, work out whether format is important or not.
 	//		currently accessed in column major order... very slow!
 	int location = -1;
-	for (unsigned int i=0; i<jumps.size(); ++i){
+	for (unsigned int i=0; i<jumpIndices.size(); i+=3){
 
 		//Jump from start to end
-		//1 if jump i removes peg at hole
-		(*jumpMat)[jumps[i].startIndex][++location]++;
-		(*jumpMat)[jumps[i].midIndex][location]++;
+		//1 if jump removes peg at hole (jumpIndices[i])
+		(*jumpMat)[jumpIndices[i]][++location]++;
+		(*jumpMat)[jumpIndices[i+1]][location]++;
 
-		//-1 if jump i places peg at hole
-		(*jumpMat)[jumps[i].endIndex][location]--;
+		//-1 if jump places peg at hole jumpIndices[i]
+		(*jumpMat)[jumpIndices[i+2]][location]--;
 
 		////Jump from end to start
 		////And reverse!
-		(*jumpMat)[jumps[i].endIndex][++location]++;
-		(*jumpMat)[jumps[i].midIndex][location]++;
+		(*jumpMat)[jumpIndices[i+2]][++location]++;
+		(*jumpMat)[jumpIndices[i+1]][location]++;
 
-		(*jumpMat)[jumps[i].startIndex][location]--;
+		(*jumpMat)[jumpIndices[i]][location]--;
 
 	}
 

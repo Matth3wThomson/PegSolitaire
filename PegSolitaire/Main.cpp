@@ -23,9 +23,10 @@ int main(){
 
 		Matrix<bool> board(2, 3, true);
 
-		/*Solitaire b(1);*/
+		Solitaire a(true);
 		Solitaire b(board);
 		
+		std::cout << a;
 		std::cout << b;
 
 		system("pause");

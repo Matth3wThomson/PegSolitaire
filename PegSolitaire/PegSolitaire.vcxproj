@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="PerformanceCounter.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="MatrixDefinition.h" />
     <ClInclude Include="Solitaire.h" />
