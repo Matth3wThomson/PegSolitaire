@@ -50,6 +50,8 @@ public:
 		const Matrix<int>& indexMatrix, const Vector<bool>& stateVector);
 
 	bool EOG();
+	bool perform_move(int x, int y, char direction);
+	void play_game();
 
 	friend std::ostream& operator<<(std::ostream& os, const Solitaire& s){
 		s.PrintBoard(os);

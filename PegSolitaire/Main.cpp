@@ -24,16 +24,37 @@ int main(){
 		Matrix<bool> board(2, 3, true);
 
 		Solitaire a(true);
+
 		/*Solitaire b(board);*/
 
-		/*while (!a.EOG(){
+		//While it is not the end of the game
+		/*while (!a.EOG()){
+			std::cout << a << std::endl;
+			
+			int x, y;
+			char dir;
 
+			do {
+				std::cout << "Please enter an X coordinate: ";
+				std::cin >> x;
+
+				std::cout << "Please enter a Y coordinate: ";
+				std::cin >> y;
+
+				std::cout << "Please enter a direction; (U)p, (D)own, (L)eft, (R)ight: ";
+				std::cin >> dir;
+
+			}while (!a.perform_move(x, y, dir));
+
+			std::cout << "Move made! ";
+			system("pause");
+			system("cls");
 		}*/
 
-		std::cout << a;
-		/*std::cout << b;*/
+		a.play_game();
 
 		system("pause");
+
 	}
 	
 	_CrtDumpMemoryLeaks();

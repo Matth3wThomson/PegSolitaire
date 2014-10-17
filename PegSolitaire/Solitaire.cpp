@@ -10,9 +10,6 @@ Solitaire::Solitaire(bool Eng)
 	indexMatrix = CreateIndexMat(boardShape);
 	stateVector = CreateStateVec(boardShape);
 	jumpMatrix = CreateJumpMat(boardShape, indexMatrix, stateVector);
-
-	std::cout << indexMatrix;
-
 }
 
 Solitaire::Solitaire(Matrix<bool>& boardShape){
@@ -27,7 +24,7 @@ Solitaire::Solitaire(Matrix<bool>& boardShape){
 
 Solitaire::~Solitaire(void)
 {
-	
+
 }
 
 Matrix<bool> Solitaire::CreateEngBoard(){
@@ -155,23 +152,189 @@ Matrix<int> Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matri
 
 //Calculate whether the game has ended
 bool Solitaire::EOG(){
+	//For every possible location on the board
 	for (int i=0; i<boardShape.get_x_dim(); ++i)
 		for (int j=0; j<boardShape.get_y_dim(); ++j)
-			if ((boardShape)[i][j]){
-				if ((stateVector)[(indexMatrix)[i][j]]){
-					
+			//Check if the board has a peg hole there
+				if (boardShape[i][j]){
+					//Check if there is a peg in the hole
+					if (stateVector[indexMatrix[i][j]]){
+						//See if jump left is possible
+						//Make sure you're not jumping off the matrix
+						if (j>2)
+							//Make sure you're not jumping off the board
+								if (indexMatrix[i][j-1] > -1 && indexMatrix[i][j-2] > -1)
+									//See if the required pegs for a jump are present (jump over adjacent, into adjacent+1)
+										if (stateVector[indexMatrix[i][j-1]] && !stateVector[indexMatrix[i][j-2]])
+											return false; //If so, the game isn't over yet!
+
+						//See if jump right is possible
+						if (j+2<boardShape.get_y_dim())
+							if (indexMatrix[i][j+1] > -1 && indexMatrix[i][j+2] > -1)
+								if (stateVector[indexMatrix[i][j+1]] && !stateVector[indexMatrix[i][j+2]])
+									return false;
+
+						//See if jump up is possible
+						if (i>2)
+							if (indexMatrix[i-1][j] > -1 && indexMatrix[i-2][j] > -1)
+								if (stateVector[indexMatrix[i-1][j]] && !stateVector[indexMatrix[i-2][j]])
+									return false;
+
+						//See if jump down is possible
+						if (i+2<boardShape.get_x_dim())
+							if (indexMatrix[i+1][j] > -1 && indexMatrix[i+2][j] > -1)
+								if (stateVector[indexMatrix[i+1][j]] && !stateVector[indexMatrix[i+2][j]])
+									return false;
+
+					}
 				}
+				//No possible moves found, it must be the end of the game!
+				return true;
+}
+
+//VERY LONG FOR LITTLE CODE!
+bool Solitaire::perform_move(int x, int y, char direction){
+
+	//Check dimensions are correct
+	if (x < 0 || x>= boardShape.get_x_dim() || y < 0 || y >= boardShape.get_y_dim()) return false;
+
+	int xdir = 0, ydir = 0;
+
+	switch (direction){
+	case 'U':
+	case 'u':
+		if (x>2)
+			--xdir;
+		/*if (boardShape[x][y] && boardShape[x-1][y] && boardShape[x-2][y])
+		if (stateVector[indexMatrix[x][y]] && stateVector[indexMatrix[x-1][y]] && !stateVector[indexMatrix[x-2][y]]){
+		stateVector[indexMatrix[x][y]] = false;
+		stateVector[indexMatrix[x-1][y]] = false;
+		stateVector[indexMatrix[x-2][y]] = true;
+		return true;
+		}*/
+		break;
+	case 'D':
+	case 'd':
+		if (x+2 < boardShape.get_x_dim())
+			++xdir;
+		/*if (boardShape[x][y] && boardShape[x+1][y] && boardShape[x+2][y])
+		if (stateVector[indexMatrix[x][y]] && stateVector[indexMatrix[x+1][y]] && !stateVector[indexMatrix[x+2][y]]){
+		stateVector[indexMatrix[x][y]] = false;
+		stateVector[indexMatrix[x+1][y]] = false;
+		stateVector[indexMatrix[x+2][y]] = true;
+		return true;
+		}*/
+
+		break;
+	case 'L':
+	case 'l':
+		if (y>2)
+			--ydir;
+		/*if (boardShape[x][y] && boardShape[x][y-1] && boardShape[x][y-2])
+		if (stateVector[indexMatrix[x][y]] && stateVector[indexMatrix[x][y-1]] && !stateVector[indexMatrix[x][y-2]]){
+		stateVector[indexMatrix[x][y]] = false;
+		stateVector[indexMatrix[x][y-1]] = false;
+		stateVector[indexMatrix[x][y-2]] = true;
+		return true;
+		}*/
+
+		break;
+	case 'R':
+	case 'r':
+		if (y+2 < boardShape.get_y_dim())
+			++ydir;
+		/*if (boardShape[x][y] && boardShape[x][y+1] && boardShape[x][y+2])
+		if (stateVector[indexMatrix[x][y]] && stateVector[indexMatrix[x][y+1]] && !stateVector[indexMatrix[x][y+2]]){
+		stateVector[indexMatrix[x][y]] = false;
+		stateVector[indexMatrix[x][y+1]] = false;
+		stateVector[indexMatrix[x][y+2]] = true;
+		return true;
+		}*/
+
+		break;
+	}
+
+	//A movement has been found!
+	if (xdir != 0 || ydir != 0){
+		if (boardShape[x][y] && boardShape[x+xdir][y+ydir] && boardShape[x+2*xdir][y+2*ydir])
+			if (stateVector[indexMatrix[x][y]] && stateVector[indexMatrix[x+xdir][y+ydir]] && !stateVector[indexMatrix[x+2*xdir][y+2*ydir]]){
+				stateVector[indexMatrix[x][y]] = false;
+				stateVector[indexMatrix[x+xdir][y+ydir]] = false;
+				stateVector[indexMatrix[x+2*xdir][y+2*ydir]] = true;
+				return true;
 			}
-			return true;
+	}
+	return false;
+}
+
+void Solitaire::play_game(){
+	while (!EOG()){
+		std::cout << *this << std::endl;
+
+		int x, y;
+		char dir;
+
+		do {
+			std::cout << "Please enter an X coordinate: ";
+			std::cin >> x;
+
+			std::cout << "Please enter a Y coordinate: ";
+			std::cin >> y;
+
+			std::cout << "Please enter a direction; (U)p, (D)own, (L)eft, (R)ight: ";
+			std::cin >> dir;
+
+		}while (!this->perform_move(x, y, dir));
+
+		system("cls");
+		std::cout << "Move made! " << std::endl;
+	}
+
+	std::cout << "Game over! " << std::endl;
 }
 
 void Solitaire::PrintBoard(std::ostream& os) const{
+
+	os << "+---+";
+	for (int j=0; j<indexMatrix.get_y_dim(); ++j)
+		os << "---+";
+	os << std::endl;
+
+	os << "|X\\Y|";
+	for (int i=0; i<indexMatrix.get_y_dim(); ++i)
+		os << " " << i << " |";
+
+	os << std::endl;
+
 	for (int i=0; i<indexMatrix.get_x_dim(); ++i){
+
+		os << "+---+";
+		for (int j=0; j<indexMatrix.get_y_dim(); ++j)
+			os << "---+";
+
+		os << std::endl;
+		os << "| " << i << " |";
+
 		for (int j=0; j<indexMatrix.get_y_dim(); ++j){
-			if (boardShape[i][j]) os << stateVector[indexMatrix[i][j]];
+			os << " ";
+			if (boardShape[i][j]) os << ((stateVector[indexMatrix[i][j]]) ? "X" : "O");
 			else os << " ";
-			os << ",";
+			os << " |";
 		}
-		os << "\n";
+		os << std::endl;
 	}
+
+	os << "+---+";
+	for (int j=0; j<indexMatrix.get_y_dim(); ++j)
+		os << "---+";
+	os << std::endl;
 }
+
+//Spare code for drawing according to file spec
+//for (int i=0; i<indexMatrix.get_x_dim(); ++i){
+//		for (int j=0; j<indexMatrix.get_y_dim(); ++j){
+//			if (boardShape[i][j]) os << stateVector[indexMatrix[i][j]];
+//			else os << " ";
+//			os << ",";
+//		}
+//		os << "\n";
