@@ -33,6 +33,12 @@
     <ClInclude Include="PerformanceCounter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="YaleMatrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="YaleMatrixDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">

@@ -5,6 +5,7 @@
 
 #include "Solitaire.h"
 #include <iostream>
+#include "YaleMatrix.h"
 
 
 
@@ -15,9 +16,33 @@ int main(){
 	_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
 	{
 
-		Solitaire a(true);
+		/*Solitaire a(true);
 
 		a.play_game();
+
+		system("pause");*/
+
+		Matrix<int> b(4, 4, 0);
+		b[1][0] = 5;
+		b[1][1] = 8;
+		b[2][2] = 3;
+		b[3][1] = 6;
+
+		Matrix<int> a(4, 6, 0);
+		a[0][0] = 10;
+		a[0][1] = 20;
+		a[1][1] = 30;
+		a[1][3] = 40;
+		a[2][2] = 50;
+		a[2][3] = 60;
+		a[2][4] = 70;
+		a[3][5] = 80;
+
+		YaleMatrix<int> ym(b);
+		YaleMatrix<int>ym2(a);
+
+		std::cout << ym << std::endl;
+		std::cout << ym2 << std::endl;
 
 		system("pause");
 

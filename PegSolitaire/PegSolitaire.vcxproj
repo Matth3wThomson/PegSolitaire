@@ -17,6 +17,8 @@
     <ClInclude Include="Solitaire.h" />
     <ClInclude Include="Vector.h" />
     <ClInclude Include="VectorDefinition.h" />
+    <ClInclude Include="YaleMatrix.h" />
+    <ClInclude Include="YaleMatrixDef.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
