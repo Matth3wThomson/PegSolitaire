@@ -1,9 +1,81 @@
 
+//DEFAULT
+template<typename T>
+YaleMatrix<T>::YaleMatrix():
+A(NULL), IA(NULL), JA(NULL), x(0), y(0){
+	
+}
 
+//COPY CONSTRUCTOR
+template<typename T>
+YaleMatrix<T>::YaleMatrix(const YaleMatrix<T>& rhs):
+x(rhs.x), y(rhs.y){
+
+	
+	IA = new int[x];
+	memcpy_s(IA, (x*sizeof(int)), rhs.IA, (x*sizeof(int)));
+
+	A = new T[IA[x-1]]();
+	JA = new int[IA[x-1]]();
+
+	memcpy_s(A, (IA[x-1]*sizeof(T)), rhs.A, (IA[x-1]*sizeof(T)));
+	memcpy_s(JA, (IA[x-1]*sizeof(int)), rhs.JA, (IA[x-1]*sizeof(int)));
+}
+
+//MOVE CONSTRUCTOR
+template<typename T>
+YaleMatrix<T>::YaleMatrix(YaleMatrix<T>&& rval):
+A(rval.A), IA(rval.IA), JA(rval.JA), x(rval.x), y(rval.y){
+	rval.A = NULL;
+	rval.IA = NULL;
+	rval.JA = NULL;
+	rval.x = 0;
+	rval.y = 0;
+}
+
+//ASSIGNMENT OPERATOR
+template<typename T>
+YaleMatrix<T>& YaleMatrix<T>::operator=(const YaleMatrix<T>& rhs){
+	delete[] A;
+	delete[] IA;
+	delete[] JA;
+
+	x = rhs.x;
+	y = rhs.y;
+
+	IA = new int[x];
+	memcpy_s(IA, (x*sizeof(int)), rhs.IA, (x*sizeof(int)));
+
+	A = new T[IA[x-1]]();
+	JA = new int[IA[x-1]]();
+
+	memcpy_s(A, (IA[x-1]*sizeof(T)), rhs.A, (IA[x-1]*sizeof(T)));
+	memcpy_s(JA, (IA[x-1]*sizeof(int)), rhs.JA, (IA[x-1]*sizeof(int)));
+
+	return *this;
+}
+
+//MOVE-ASSIGN OPERATOR
+template<typename T>
+YaleMatrix<T>& YaleMatrix<T>::operator=(YaleMatrix<T>&& rval){
+	std::swap(A, rval.A);
+	std::swap(IA, rval.IA);
+	std::swap(JA, rval.JA);
+	std::swap(x, rval.x);
+	std::swap(y, rval.y);
+
+	return *this;
+}
+
+//Use of vector over double loop works well for large sparse matrices,
+//being out performed on small spare matrices. Since our jump matrices will tend
+//to be large (33*n) where n>30, a vector was used.
 template<typename T>
 YaleMatrix<T>::YaleMatrix(const Matrix<T>& verbose):
-	x(verbose.get_x_dim()), y(verbose.get_y_dim()){
+	x(verbose.get_x_dim()+1), y(verbose.get_y_dim()){
+		
 
+		//TODO: What if the matrix passed is 0x0
 		std::vector<KeyValue> nonZeroElements = std::vector<KeyValue>();
 
 		//IA is of size equal to number of rows in the matrix
@@ -18,32 +90,39 @@ YaleMatrix<T>::YaleMatrix(const Matrix<T>& verbose):
 				if (verbose[i][j]){
 					//If there exists an element
 					//Add it to the vector of elements we know of
-					nonZeroElements.push_back(KeyValue(verbose[i][j], j));
+
+					nonZeroElements.push_back(KeyValue(&verbose[i][j], j));
 
 					//Check to see if it is the first one on its row, if so set the IA value
 					if (IA[i] < 0) IA[i] = indexCounter;
 					indexCounter++;
-
+					
 				}
 		}
 
-
 		//We now know the size of A and JA
-		NZ = nonZeroElements.size();
-		A = new T[NZ]();
-		JA = new int[NZ]();
+		IA[x-1] = nonZeroElements.size();
+		A = new T[IA[x-1]]();
+		JA = new int[IA[x-1]]();
 
 		//Unset the -1 flag
 		if (IA[0] == -1) IA[0] = 0;
 
-		for (unsigned int i=0; i<nonZeroElements.size(); ++i){
+		for (int i=0; i<IA[x-1]; ++i){
 			//Set A to contain all of the Non zero elements
-			A[i] = nonZeroElements[i].value;
+			A[i] = *nonZeroElements[i].value;
 
 			//Set JA to contain all of the column identifiers for all non zero elements
 			JA[i] = nonZeroElements[i].yindex;
 		}
 
+}
+
+template<typename T>
+YaleMatrix<T>::~YaleMatrix(){
+	delete[] A;
+	delete[] IA;
+	delete[] JA;
 }
 
 

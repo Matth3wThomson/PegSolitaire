@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Matrix.h"
 #include "Vector.h"
+#include "YaleMatrix.h"
 #include <vector>
 
 /**
@@ -64,6 +64,7 @@ private:
 	Vector<bool> stateVector;
 	Matrix<int> indexMatrix;
 	Matrix<int> jumpMatrix;
+	YaleMatrix<int> sparseJumpMat;
 
 	/*struct jump {
 		int startIndex, midIndex, endIndex;

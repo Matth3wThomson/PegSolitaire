@@ -16,17 +16,17 @@ Vector<T>::~Vector(void)
 
 template<typename T>
 Vector<T>::Vector(const Vector<T>& rhs):
-container_size(rhs.container_size)
+	container_size(rhs.container_size)
 {
-	arr = new T[];
+	arr = new T[container_size];
 	memcpy_s(arr, (container_size*sizeof(T)), rhs.arr, (container_size*sizeof(T)));
 }
 
 template<typename T>
 Vector<T>::Vector(Vector<T>&& rval):
-arr(rval.arr), container_size(rval.container_size){
-	rval.arr = 0;
-	rval.container_size = 0;
+	arr(rval.arr), container_size(rval.container_size){
+		rval.arr = 0;
+		rval.container_size = 0;
 }
 
 template<typename T>
@@ -39,7 +39,7 @@ Vector<T>& Vector<T>::operator=(const Vector<T>& rhs){
 	//allocate new memory
 	arr = new T[container_size];
 	memset(this->arr, 0, (container_size * sizeof(T)));
-	
+
 	//Copy Values
 	for (int i=0; i<rhs.container_size; ++i){
 		arr[i] = rhs.arr[i];
@@ -53,3 +53,79 @@ Vector<T>& Vector<T>::operator=(Vector<T>&& rval){
 
 	return *this;
 }
+
+template<typename T>
+T Vector<T>::magnitude(){
+	E sum;
+	for (int i=0; i<this->container_size; ++i)
+		sum += (*this)[i] * (*this)[i];
+	
+	return sqrt(sum);
+}
+
+//Arithmetic
+//T
+template<typename E>
+Vector<E> operator*(const Vector<E>& lhs, const E& rhs){
+	Vector<E> temp(lhs);
+	
+	for (int i=0; i<temp.container_size; ++i)
+		temp[i] *= rhs;
+
+	return temp;
+};
+
+template<typename E>
+Vector<E> operator*(const E& lhs, const Vector<E>& rhs){
+	return rhs * lhs;
+};
+
+
+//Vector
+template<typename E>
+E operator*(const Vector<E>& lhs, const Vector<E>& rhs){
+	if (lhs.container_size != rhs.container_size) throw std::invalid_argument("Dot product requires vectors of equal size");
+
+	E value = E();
+
+	for (int i=0; i<rhs.container_size; ++i)
+		value += lhs[i] * rhs[i];
+
+	return value;
+};
+
+template<typename E>
+Vector<E> operator+(const Vector<E>& lhs, const Vector<E>& rhs){
+	if (lhs.container_size != rhs.container_size) throw 
+		std::invalid_argument("Vector addition requires equal length");
+
+	Vector<E> temp(lhs);
+
+	for (int i=0; i<rhs.container_size; ++i)
+		temp[i] += rhs[i];
+
+	return temp;
+};
+
+template<typename T>
+Vector<T>& Vector<T>::operator+=(const Vector<T>& rhs){
+	return *this = *this + rhs;
+};
+
+template<typename E>
+Vector<E> operator-(const Vector<E>& lhs, const Vector<E>& rhs){
+	if (lhs.container_size != rhs.container_size) 
+		throw std::invalid_argument("Vector addition requires equal length");
+
+	Vector<E> temp(lhs);
+
+	for (int i=0; i<rhs.container_size; ++i)
+		temp[i] -= rhs[i];
+
+	return temp;
+};
+
+template<typename T>
+Vector<T>& Vector<T>::operator-=(const Vector<T>& rhs){
+	return *this = *this - rhs;
+};

@@ -3,6 +3,8 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <stdexcept>
+/*#include <stdlib.h>*/	//TODO: Work out if necessary
 
 #ifndef NULL
 #define NULL 0
@@ -12,7 +14,16 @@
 		-Do all operators for matrix class.
 		-Evaulate pass by reference used... Lots of matrices are bools (slower to pass 4 bytes than
 		 1 bit) 
-		-Finish mathematical operators and test them!
+		-Test mathematical operators
+		-Test determinant+ transpose
+		-Implement Inverse
+		-Implement vector/matrix functionality
+		-Make assignment operators more efficient
+
+NOTES:
+		-Performance of exceptions that arent thrown or caught identical to functions that dont throw,
+		 therefore exceptions used on functions where matrices must be of identical size, as program
+		 crash is desired. (BENCHMARK: 10000 valid add operations)
 */
 
 
@@ -38,19 +49,27 @@ public:
 	T determinant();
 	Matrix<T> inverse();
 	Matrix<T> transpose();
-	
+
+	//T arithmetic
+	template<typename E>
+	friend Matrix<E> operator*(const Matrix<E>& lhs, const E& rhs);
+	template<typename E>
+	friend Matrix<E> operator*(const E& lhs, const Matrix<E>& rhs);
+	Matrix<T>& operator*=(const T& rhs);
+
+
+	//Matrix arithmetic
 	template<typename E>
 	friend Matrix<E> operator*(const Matrix<E>& lhs, const Matrix<E>& rhs);
+	Matrix<T>& operator*=(const Matrix<T>& rhs);
 	
 	template<typename E>
 	friend Matrix<E> operator+(const Matrix<E>& lhs, const Matrix<E>& rhs);
+	Matrix<T>& operator+=(const Matrix<T>& rhs);
 
 	template<typename E>
 	friend Matrix<E> operator-(const Matrix<E>& lhs, const Matrix<E>& rhs);
-
-	template<typename E>
-	friend Matrix<E> operator/(const Matrix<E>& lhs, const Matrix<E>& rhs);
-	
+	Matrix<T>& operator-=(const Matrix<T>& rhs);
 
 	//Insertion
 	inline void set_element(const int x, const int y, const T& elem){ mat[x][y] = elem; };

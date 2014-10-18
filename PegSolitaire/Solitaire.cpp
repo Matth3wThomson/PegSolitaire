@@ -10,6 +10,11 @@ Solitaire::Solitaire(bool Eng)
 	indexMatrix = CreateIndexMat(boardShape);
 	stateVector = CreateStateVec(boardShape);
 	jumpMatrix = CreateJumpMat(boardShape, indexMatrix, stateVector);
+	sparseJumpMat = YaleMatrix<int>(jumpMatrix);
+
+	std::cout << "Original jump matrix size: " << jumpMatrix.get_x_dim() * jumpMatrix.get_y_dim()
+		<< std::endl;
+	std::cout << sparseJumpMat <<std::endl;
 }
 
 Solitaire::Solitaire(Matrix<bool>& boardShape){
@@ -20,6 +25,7 @@ Solitaire::Solitaire(Matrix<bool>& boardShape){
 	stateVector = CreateStateVec(this->boardShape);
 
 	jumpMatrix = CreateJumpMat(this->boardShape, this->indexMatrix, this->stateVector);
+	sparseJumpMat = YaleMatrix<int>(jumpMatrix);
 }
 
 Solitaire::~Solitaire(void)

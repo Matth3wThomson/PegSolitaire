@@ -80,7 +80,7 @@ Matrix<T>& Matrix<T>::operator=(Matrix<T>&& rval){
 //TODO: Untested
 template<typename T>
 T Matrix<T>::determinant(){
-	if (x != y) return; //TODO: Throw exception (If not square)
+	if (x != y) throw std::invalid_argument("Determinant requires square matrix");
 	T pos;
 	T neg;
 
@@ -95,7 +95,7 @@ T Matrix<T>::determinant(){
 //TODO: Implement
 template<typename T>
 Matrix<T> Matrix<T>::inverse(){
-	if (determinant() == 0) return; //TODO: Throw exception
+	T determinant = determinant();
 }
 
 //TODO: Untested
@@ -110,9 +110,30 @@ Matrix<T> Matrix<T>::transpose(){
 	return trans;
 }
 
+//T ARITHMETIC
+template<typename E>
+Matrix<E> operator*(const Matrix<E>& lhs, const E& rhs){
+	Matrix<E> result(lhs);
+
+	for (int i=0; i<result.x; ++i)
+		for (int j=0; j<result.y; ++j)
+			result[i][j]*=rhs;
+
+	return result;
+}
+
+template<typename E>
+Matrix<E> operator*(const E& lhs, const Matrix<E>& rhs){
+	return rhs * lhs;
+}
+
+
+//MATRIX ARITHMETIC
+
 template<typename E>
 Matrix<E> operator*(const Matrix<E>& lhs, const Matrix<E>& rhs){
 	Matrix<E> result(lhs.x, rhs.y);
+
 	for (int i=0; i<lhs.x; ++i){
 		for (int j=0; j<lhs.x; ++j){
 			for (int k = 0; k < lhs.x; ++k){
@@ -120,35 +141,46 @@ Matrix<E> operator*(const Matrix<E>& lhs, const Matrix<E>& rhs){
 			}
 		}
 	}
+
 	return result;
 }
 
-//TODO: Safeguards And exceptions for matrix sizes
+template<typename T>
+Matrix<T>& Matrix<T>::operator*=(const Matrix<T>& rhs){
+	return *this = *this * rhs;
+}
+
 template<typename E>
 Matrix<E> operator+(const Matrix<E>& lhs, const Matrix<E>& rhs){
+	if (lhs.x != rhs.x || lhs.y != rhs.y) throw std::invalid_argument("Matrix addition requires matrices of same size");
 
-	Matrix<E> temp();
+	Matrix<E> temp(lhs);
+
 	for (int i=0; i<lhs.get_x_dim(); ++i)
 		for (int j=0; j<lhs.get_y_dim(); ++j)
-			temp[i][j] = lhs[i][j] + rhs[i][j];
+			temp[i][j] += rhs[i][j];
 	
 	return temp;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::operator+=(const Matrix<T>& rhs){
+	return *this = *this + rhs;
 }
 
 template<typename E>
 Matrix<E> operator-(const Matrix<E>& lhs, const Matrix<E>& rhs){
+	if (lhs.x != rhs.x || lhs.y != rhs.y) throw std::invalid_argument("Matrix subtraction requires matrices of same size");
 
-	Matrix<E> temp();
+	Matrix<E> temp(lhs);
+
 	for (int i=0; i<lhs.get_x_dim(); ++i)
 		for (int j=0; j<lhs.get_y_dim(); j++)
-			temp[i][j] = lhs[i][j] - rhs[i][j];
+			temp[i][j] -= rhs[i][j];
 
 	return temp;
 }
-
-template<typename E>
-Matrix<E> operator/(const Matrix<E>& lhs, const Matrix<E>& rhs){
-	Matrix<E> temp();
-
-	
+template<typename T>
+Matrix<T>& Matrix<T>::operator-=(const Matrix<T>& rhs){
+	return *this = *this - rhs;
 }

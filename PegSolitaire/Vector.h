@@ -4,18 +4,48 @@
 #define NULL 0
 #endif
 
+#include <iostream>
+#include <stdexcept>
+
+/*
+	TODO:
+		-Correctness testing for all vector operators
+
+*/
+
 template<typename T>
 class Vector
 {
 public:
-	static const int defaultSize = 5;
+	static const int default_size = 5;
 
-	Vector(const int size = defaultSize, const T& value = NULL);
+	Vector(const int size = default_size, const T& value = NULL);
 	Vector(const Vector<T>& rhs);
 	Vector(Vector<T>&& rval); //<-- Move constructor... AMAZING!
 	~Vector(void);
 	Vector<T>& operator=(const Vector<T>& rhs);
 	Vector<T>& operator=(Vector<T>&& rval);
+
+	//Arithmetic
+	T magnitude();
+
+	//T
+	template<typename E>
+	friend Vector<E> operator*(const Vector<E>& lhs, const E& rhs);
+	template<typename E>
+	friend Vector<E> operator*(const E& lhs, const Vector<E>& rhs);
+
+	//Vector
+	template<typename E>
+	friend E operator*(const Vector<E>& lhs, const Vector<E>& rhs);
+
+	template<typename E>
+	friend Vector<E> operator+(const Vector<E>& lhs, const Vector<E>& rhs);
+	Vector<T>& operator+=(const Vector<T>& rhs);
+
+	template<typename E>
+	friend Vector<E> operator-(const Vector<E>& lhs, const Vector<E>& rhs);
+	Vector<T>& operator-=(const Vector<T>& rhs);
 
 	//Insertion
 	inline void insert_element(const T& element, const int location){ arr[location] = element; };

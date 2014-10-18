@@ -1,3 +1,4 @@
+#pragma once
 
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -5,7 +6,7 @@
 
 #include "Solitaire.h"
 #include <iostream>
-#include "YaleMatrix.h"
+#include "PerformanceCounter.h"
 
 
 
@@ -22,7 +23,7 @@ int main(){
 
 		system("pause");*/
 
-		Matrix<int> b(4, 4, 0);
+	/*	Matrix<int> b(4, 4, 0);
 		b[1][0] = 5;
 		b[1][1] = 8;
 		b[2][2] = 3;
@@ -39,10 +40,26 @@ int main(){
 		a[3][5] = 80;
 
 		YaleMatrix<int> ym(b);
-		YaleMatrix<int>ym2(a);
+		YaleMatrix<int> ym2(a);
 
 		std::cout << ym << std::endl;
-		std::cout << ym2 << std::endl;
+		std::cout << ym2 << std::endl;*/
+		Matrix<int> a(10, 10, 5);
+		Matrix<int> b(10, 10, 3);
+		Matrix<int> c(11, 11, 7);
+
+		Vector<int> d(5, 5);
+		Vector<int> e(5, 3);
+		Vector<int> f(10, 3);
+
+		/*Solitaire a(true);*/
+		StartCounter();
+
+		for (int i=0; i<10000; ++i){
+			d*e;
+		}
+
+		std::cout << "10000 working additions: " << GetCounter();
 
 		system("pause");
 
