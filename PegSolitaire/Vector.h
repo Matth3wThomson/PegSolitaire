@@ -7,6 +7,9 @@
 #include <iostream>
 #include <stdexcept>
 
+template<typename T>
+class YaleMatrix;
+
 /*
 	TODO:
 		-Correctness testing for all vector operators
@@ -19,12 +22,16 @@ class Vector
 public:
 	static const int default_size = 5;
 
-	Vector(const int size = default_size, const T& value = NULL);
+	Vector(const int size = default_size);
 	Vector(const Vector<T>& rhs);
 	Vector(Vector<T>&& rval); //<-- Move constructor... AMAZING!
 	~Vector(void);
 	Vector<T>& operator=(const Vector<T>& rhs);
 	Vector<T>& operator=(Vector<T>&& rval);
+
+	//TODO: Implement a copy constructor that takes an alternate type.
+	template<typename E>
+	Vector(const Vector<E>& rhs);
 
 	//Arithmetic
 	T magnitude();
@@ -60,7 +67,7 @@ public:
 	//Display
 	friend std::ostream& operator<<(std::ostream& os, Vector<T>& v){
 		for (int i=0; i<v.size(); ++i)
-			os << v[i];
+			os << v[i] << ",";
 		return os;
 	};
 

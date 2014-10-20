@@ -2,35 +2,35 @@
 //DEFAULT
 template<typename T>
 YaleMatrix<T>::YaleMatrix():
-A(NULL), IA(NULL), JA(NULL), x(0), y(0){
-	
+	A(NULL), IA(NULL), JA(NULL), x(0), y(0){
+
 }
 
 //COPY CONSTRUCTOR
 template<typename T>
 YaleMatrix<T>::YaleMatrix(const YaleMatrix<T>& rhs):
-x(rhs.x), y(rhs.y){
+	x(rhs.x), y(rhs.y){
 
-	
-	IA = new int[x];
-	memcpy_s(IA, (x*sizeof(int)), rhs.IA, (x*sizeof(int)));
 
-	A = new T[IA[x-1]]();
-	JA = new int[IA[x-1]]();
+		IA = new int[x];
+		memcpy_s(IA, (x*sizeof(int)), rhs.IA, (x*sizeof(int)));
 
-	memcpy_s(A, (IA[x-1]*sizeof(T)), rhs.A, (IA[x-1]*sizeof(T)));
-	memcpy_s(JA, (IA[x-1]*sizeof(int)), rhs.JA, (IA[x-1]*sizeof(int)));
+		A = new T[IA[x-1]]();
+		JA = new int[IA[x-1]]();
+
+		memcpy_s(A, (IA[x-1]*sizeof(T)), rhs.A, (IA[x-1]*sizeof(T)));
+		memcpy_s(JA, (IA[x-1]*sizeof(int)), rhs.JA, (IA[x-1]*sizeof(int)));
 }
 
 //MOVE CONSTRUCTOR
 template<typename T>
 YaleMatrix<T>::YaleMatrix(YaleMatrix<T>&& rval):
-A(rval.A), IA(rval.IA), JA(rval.JA), x(rval.x), y(rval.y){
-	rval.A = NULL;
-	rval.IA = NULL;
-	rval.JA = NULL;
-	rval.x = 0;
-	rval.y = 0;
+	A(rval.A), IA(rval.IA), JA(rval.JA), x(rval.x), y(rval.y){
+		rval.A = NULL;
+		rval.IA = NULL;
+		rval.JA = NULL;
+		rval.x = 0;
+		rval.y = 0;
 }
 
 //ASSIGNMENT OPERATOR
@@ -73,7 +73,7 @@ YaleMatrix<T>& YaleMatrix<T>::operator=(YaleMatrix<T>&& rval){
 template<typename T>
 YaleMatrix<T>::YaleMatrix(const Matrix<T>& verbose):
 	x(verbose.get_x_dim()+1), y(verbose.get_y_dim()){
-		
+
 
 		//TODO: What if the matrix passed is 0x0
 		std::vector<KeyValue> nonZeroElements = std::vector<KeyValue>();
@@ -96,7 +96,7 @@ YaleMatrix<T>::YaleMatrix(const Matrix<T>& verbose):
 					//Check to see if it is the first one on its row, if so set the IA value
 					if (IA[i] < 0) IA[i] = indexCounter;
 					indexCounter++;
-					
+
 				}
 		}
 
@@ -127,13 +127,46 @@ YaleMatrix<T>::~YaleMatrix(){
 
 
 template<typename T>
-T& YaleMatrix<T>::at(int x, int y){
-	//Work out how many elements are on that row
-	int k = (IA[x+1]) - (IA[x]);
+T YaleMatrix<T>::at(int x, int y){
 
 	//Loop through the elements on the row to see if one is in the column requested
-	for (int i=IA[x]; i<IA[x]+k; ++i)
+	for (int i=IA[x]; i<IA[x+1]; ++i)
 		if (JA[i] == y) return A[i];
 
 	return 0;
+}
+
+//template<typename T>
+//Vector<T> YaleMatrix<T>::operator*(const Vector<T>& rhs){
+//	if (this->y != rhs.size()) throw 
+//		std::invalid_argument("Matrix/Vector multiplication requires same number of matrix columns to vector size");
+//
+//	Vector<T> temp(rhs.size());
+//
+//	//For each possible row
+//	for (int i=0; i<x-1; ++i)
+//		for (int j = IA[i]; j < IA[i+1]; ++j)
+//			temp[i] += A[j] * rhs[JA[j]];
+//		
+//	return temp;
+//}
+
+template<typename E>
+Vector<E> operator*(const YaleMatrix<E>& lhs, const Vector<E>& rhs){
+	if (lhs.y != rhs.size()) throw 
+		std::invalid_argument("Matrix/Vector multiplication requires same number of matrix columns to vector size");
+
+	Vector<E> temp(rhs.size());
+
+	//For each possible row
+	for (int i=0; i<lhs.x-1; ++i)
+		for (int j = lhs.IA[i]; j < lhs.IA[i+1]; ++j)
+			temp[i] += lhs.A[j] * rhs[lhs.JA[j]];
+		
+	return temp;
+}
+
+template<typename T>
+Vector<T> operator*(const Vector<T>& lhs, const YaleMatrix<T>& rhs){
+	return rhs*lhs;
 }

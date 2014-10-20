@@ -1,20 +1,18 @@
 #include "Solitaire.h"
 
-
+//TODO: Tidy up
 Solitaire::Solitaire(bool Eng)
 {
 	if (Eng) boardShape = CreateEngBoard();
 	else boardShape = CreateEurBoard();
 
-	//TODO: Check this is working as expected (MOVE SEMANTICS)
 	indexMatrix = CreateIndexMat(boardShape);
 	stateVector = CreateStateVec(boardShape);
-	jumpMatrix = CreateJumpMat(boardShape, indexMatrix, stateVector);
-	sparseJumpMat = YaleMatrix<int>(jumpMatrix);
+	sparseJumpMat = YaleMatrix<int>(CreateJumpMat(boardShape, indexMatrix, stateVector.size()));
 
-	std::cout << "Original jump matrix size: " << jumpMatrix.get_x_dim() * jumpMatrix.get_y_dim()
-		<< std::endl;
-	std::cout << sparseJumpMat <<std::endl;
+	
+	/*sparseJumpMat = YaleMatrix<int>(jumpMatrix);*/
+
 }
 
 Solitaire::Solitaire(Matrix<bool>& boardShape){
@@ -24,8 +22,9 @@ Solitaire::Solitaire(Matrix<bool>& boardShape){
 	indexMatrix = CreateIndexMat(this->boardShape);
 	stateVector = CreateStateVec(this->boardShape);
 
-	jumpMatrix = CreateJumpMat(this->boardShape, this->indexMatrix, this->stateVector);
-	sparseJumpMat = YaleMatrix<int>(jumpMatrix);
+	sparseJumpMat = YaleMatrix<int>(CreateJumpMat(boardShape, indexMatrix, stateVector.size()));
+	/*jumpMatrix = CreateJumpMat(this->boardShape, this->indexMatrix, this->stateVector);
+	sparseJumpMat = YaleMatrix<int>(jumpMatrix);*/
 }
 
 Solitaire::~Solitaire(void)
@@ -34,7 +33,7 @@ Solitaire::~Solitaire(void)
 }
 
 Matrix<bool> Solitaire::CreateEngBoard(){
-	Matrix<bool> temp = Matrix<bool>(7, 7, 0);
+	Matrix<bool> temp = Matrix<bool>(7, 7);
 
 	for (int i=0; i<temp.get_x_dim(); ++i){
 		for (int j=0; j<temp.get_y_dim(); ++j){
@@ -58,12 +57,13 @@ Matrix<bool> Solitaire::CreateEurBoard(){
 }
 
 Matrix<int> Solitaire::CreateIndexMat(const Matrix<bool>& boardShape){
-	Matrix<int> temp = Matrix<int>(boardShape.get_x_dim(), boardShape.get_y_dim(), -1);
+	Matrix<int> temp = Matrix<int>(boardShape.get_x_dim(), boardShape.get_y_dim());
 
 	int count = 0;
 
 	for (int i=0; i<boardShape.get_x_dim(); ++i){
 		for (int j=0; j<boardShape.get_y_dim(); ++j){
+			temp[i][j] = -1;
 			if (boardShape[i][j]){
 				temp[i][j] = count++;
 			}
@@ -82,7 +82,10 @@ Vector<bool> Solitaire::CreateStateVec(const Matrix<bool>& boardShape){
 		}
 	}
 
-	Vector<bool> temp = Vector<bool>(count, true);
+	Vector<bool> temp = Vector<bool>(count);
+
+	for (int i=0; i<temp.size(); ++i)
+		temp[i] = true;
 
 	//TODO: Figure out what to do about this.
 	temp[count/2] = false;
@@ -91,7 +94,7 @@ Vector<bool> Solitaire::CreateStateVec(const Matrix<bool>& boardShape){
 }
 
 
-Matrix<int> Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matrix<int>& indexMatrix, const Vector<bool>& stateVector){
+Matrix<int> Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matrix<int>& indexMatrix, const int stateVectorLength){
 
 	//Create a vector to store all the jumps possible on the board
 	std::vector<int> jumpIndices = std::vector<int>();
@@ -99,7 +102,7 @@ Matrix<int> Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matri
 	//Up to 4 * locations worth of jumps
 	//3 ints per 2 jumps = 1.5
 	// 4 * 1.5  = 6
-	jumpIndices.reserve(stateVector.size() * 6);
+	jumpIndices.reserve(stateVectorLength * 6);
 
 	//Go through the board shape looking for possible jumps
 	for (int i=0; i<boardShape.get_x_dim(); ++i){
@@ -129,7 +132,8 @@ Matrix<int> Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matri
 	}
 
 	//Step 2: Fill matrix with values dependent on indexMatrix and boardShape
-	Matrix<int> jumpMat = Matrix<int>(stateVector.size(), jumpIndices.size()/3*2);
+	Matrix<int> jumpMat = Matrix<int>(jumpIndices.size()/3*2, stateVectorLength);
+	//Matrix<int> jumpMat = Matrix<int>(stateVector.size(), jumpIndices.size()/3*2);
 
 	//TODO: Inefficient, work out whether format is important or not.
 	//		currently accessed in column major order... very slow!
@@ -138,18 +142,19 @@ Matrix<int> Solitaire::CreateJumpMat(const Matrix<bool>& boardShape, const Matri
 
 		//Jump from start to end
 		//1 if jump removes peg at hole (jumpIndices[i])
-		jumpMat[jumpIndices[i]][++location]++;
-		jumpMat[jumpIndices[i+1]][location]++;
+		jumpMat[++location][jumpIndices[i]]++;
+		jumpMat[location][jumpIndices[i+1]]++;
 
 		//-1 if jump places peg at hole jumpIndices[i]
-		jumpMat[jumpIndices[i+2]][location]--;
+		jumpMat[location][jumpIndices[i+2]]--;
 
 		////Jump from end to start
 		////And reverse!
-		jumpMat[jumpIndices[i+2]][++location]++;
-		jumpMat[jumpIndices[i+1]][location]++;
+		jumpMat[++location][jumpIndices[i+2]]++;
+		jumpMat[location][jumpIndices[i+1]]++;
 
-		jumpMat[jumpIndices[i]][location]--;
+		jumpMat[location][jumpIndices[i]]--;
+		
 
 	}
 

@@ -2,6 +2,8 @@
 #include <vector>
 
 //http://en.wikipedia.org/wiki/Sparse_matrix
+//Inheritance not used as this format of sparse matrix does not need to,
+//and will not do well in implementing all features of a general matrix.
 
 template<typename T>
 class YaleMatrix{
@@ -16,7 +18,17 @@ public:
 	YaleMatrix<T>& operator=(const YaleMatrix<T>& rhs);
 	YaleMatrix<T>& operator=(YaleMatrix<T>&& rval);
 
-	T& at(int x, int y);
+	template<typename E>
+	friend Vector<E> operator*(const YaleMatrix<E>& lhs, const Vector<E>& rhs);
+	//TODO: Do this function!
+	/*friend Vector<T> operator*(const Vector<T>& lhs, const YaleMatrix<T>& rhs);*/
+
+	T at(int x, int y);
+
+	int get_x_dim(){ return x-1; };
+	int get_y_dim(){ return y; };
+	int get_NNZ(){ return IA[x-1]; };
+
 
 	friend std::ostream& operator<<(std::ostream& os, const YaleMatrix<T>& ym){
 		os << "A: [";
@@ -37,8 +49,8 @@ private:
 	T* A; //1D array of non zero elements in matrix
 	int* IA; //1D array of indices of elements on each row i. IA[x-1] contains NNZ
 	int* JA; //1D array of columns for each index of A
-	int x;	//Size of IA
-	int y;	
+	int x;	//Size of IA. number of rows + 1
+	int y;	//Number of columns
 
 	struct KeyValue {
 		const T* value;

@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <string>
 #include <stdexcept>
+#include "Vector.h"
 /*#include <stdlib.h>*/	//TODO: Work out if necessary
 
 #ifndef NULL
@@ -38,7 +39,7 @@ public:
 	static const int defaultY = 3;
 
 	//Construction
-	Matrix(const int xSize = defaultX, const int ySize = defaultY, const T& value = NULL);
+	Matrix(const int xSize = defaultX, const int ySize = defaultY);
 	Matrix(const Matrix<T>& src); 
 	Matrix(Matrix<T>&& rval); //<-- Move constructor... AMAZING!
 	~Matrix(void);
@@ -70,6 +71,9 @@ public:
 	template<typename E>
 	friend Matrix<E> operator-(const Matrix<E>& lhs, const Matrix<E>& rhs);
 	Matrix<T>& operator-=(const Matrix<T>& rhs);
+
+	//Vector arithmetic
+	Vector<T> operator*(const Vector<T>& rhs);
 
 	//Insertion
 	inline void set_element(const int x, const int y, const T& elem){ mat[x][y] = elem; };

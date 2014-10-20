@@ -1,11 +1,11 @@
 //Construction and Destruction
 
 template<typename T>
-Vector<T>::Vector(const int size, const T& value):
+Vector<T>::Vector(const int size):
 	container_size(size)
 {
 	this->arr = new T[container_size];
-	memset(this->arr, value, (container_size * sizeof(T)));
+	memset(this->arr, 0, (container_size * sizeof(T)));
 }
 
 template<typename T>

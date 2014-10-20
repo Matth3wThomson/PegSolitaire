@@ -1,10 +1,10 @@
 template<typename T>
-Matrix<T>::Matrix(const int xSize, const int ySize, const T& value) :
+Matrix<T>::Matrix(const int xSize, const int ySize):
 	x(xSize), y(ySize){
 		mat = new T*[x];
 		for (int i=0; i<x; ++i){
 			mat[i] = new T[y];
-			memset(mat[i], value, (y * sizeof(T)));
+			memset(mat[i], 0, (y * sizeof(T)));
 		}
 }
 
@@ -183,4 +183,19 @@ Matrix<E> operator-(const Matrix<E>& lhs, const Matrix<E>& rhs){
 template<typename T>
 Matrix<T>& Matrix<T>::operator-=(const Matrix<T>& rhs){
 	return *this = *this - rhs;
+}
+
+//VECTOR ARITHMETIC
+
+template<typename E>
+Vector<E> Matrix<E>::operator*(const Vector<E>& rhs){
+	if (this->y != rhs.size()) throw std::invalid_argument("Matrix/Vector multiplication requires same number of matrix columns to vector size");
+
+	Vector<E> temp(rhs.size());
+
+	for (int i=0; i<this->x; ++i)
+		for (int j=0; j<this->y; ++j)
+			temp[i] += (*this)[i][j] * rhs[j];
+
+	return temp;
 }

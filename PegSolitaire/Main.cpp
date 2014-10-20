@@ -5,6 +5,7 @@
 #include <crtdbg.h>
 
 #include "Solitaire.h"
+#include "Pagoda.h"
 #include <iostream>
 #include "PerformanceCounter.h"
 
@@ -17,50 +18,41 @@ int main(){
 	_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
 	{
 
-		/*Solitaire a(true);
+		Solitaire a(true);
+		Pagoda p(true);
 
-		a.play_game();
+		//a.play_game();
 
-		system("pause");*/
+		//system("pause");
 
-	/*	Matrix<int> b(4, 4, 0);
-		b[1][0] = 5;
-		b[1][1] = 8;
-		b[2][2] = 3;
-		b[3][1] = 6;
+		//int tval = 100;
 
-		Matrix<int> a(4, 6, 0);
-		a[0][0] = 10;
-		a[0][1] = 20;
-		a[1][1] = 30;
-		a[1][3] = 40;
-		a[2][2] = 50;
-		a[2][3] = 60;
-		a[2][4] = 70;
-		a[3][5] = 80;
+		///*Pagoda a = Pagoda();*/
+		//
 
-		YaleMatrix<int> ym(b);
-		YaleMatrix<int> ym2(a);
+		//for (int i=0; i<tval; ++i){
 
-		std::cout << ym << std::endl;
-		std::cout << ym2 << std::endl;*/
-		Matrix<int> a(10, 10, 5);
-		Matrix<int> b(10, 10, 3);
-		Matrix<int> c(11, 11, 7);
+		//}
 
-		Vector<int> d(5, 5);
-		Vector<int> e(5, 3);
-		Vector<int> f(10, 3);
-
-		/*Solitaire a(true);*/
+		
 		StartCounter();
 
-		for (int i=0; i<10000; ++i){
-			d*e;
+		Vector<int> pagoda = Vector<int>();
+
+		int noGenerated = 0;
+		int provedInsolvable = 0;
+
+		for (int i=0; i<10; ++i){
+			if (p.generate_pagoda(pagoda)) noGenerated++;
+			if (p.prove_insolvable(pagoda)) provedInsolvable++;
+			p.randomize_start_and_end();
+			
 		}
 
-		std::cout << "10000 working additions: " << GetCounter();
+		std::cout << "Pagodas Generated: " << noGenerated << std::endl;
+		std::cout << "Proved insolvable: " << provedInsolvable << std::endl;
 
+		std::cout << "Time Taken: " << GetCounter() << std::endl;
 		system("pause");
 
 	}

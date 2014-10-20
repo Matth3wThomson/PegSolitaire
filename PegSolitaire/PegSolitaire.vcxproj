@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Pagoda.h" />
     <ClInclude Include="PerformanceCounter.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="MatrixDefinition.h" />
@@ -22,6 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Pagoda.cpp" />
     <ClCompile Include="Solitaire.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -15,6 +15,7 @@
 			-Having indexMatrix and State Vector computed in the same function
 			 will be much quicker
 		-Make sure that all method names are of the same style
+		-We dont need 2 matrices storing the jump matrix!
 
 	QUESTIONS:
 		-Does the orientation of the jump matrix matter? When creating, column by 
@@ -28,7 +29,6 @@
 		-When initializing your state vector, should you set values?
 		-Passing by reference to static functions good practice? will be quicker than individual
 		 returning pointers. 
-		-For the game, is coordinates necessary, as indices are nicer...
 */
 
 class Solitaire
@@ -47,7 +47,7 @@ public:
 	static Vector<bool> CreateStateVec(const Matrix<bool>& boardShape);
 
 	static Matrix<int> CreateJumpMat(const Matrix<bool>& boardShape,
-		const Matrix<int>& indexMatrix, const Vector<bool>& stateVector);
+		const Matrix<int>& indexMatrix, const int stateVectorLength);
 
 	bool EOG();
 	bool perform_move(int x, int y, char direction);
@@ -63,7 +63,6 @@ private:
 	Matrix<bool> boardShape;
 	Vector<bool> stateVector;
 	Matrix<int> indexMatrix;
-	Matrix<int> jumpMatrix;
 	YaleMatrix<int> sparseJumpMat;
 
 	/*struct jump {
