@@ -26,6 +26,8 @@ public:
 	Vector(const Vector<T>& rhs);
 	Vector(Vector<T>&& rval); //<-- Move constructor... AMAZING!
 	~Vector(void);
+
+	//TODO: Make assignment operators more efficient if data is of the same size
 	Vector<T>& operator=(const Vector<T>& rhs);
 	Vector<T>& operator=(Vector<T>&& rval);
 

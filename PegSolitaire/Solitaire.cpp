@@ -69,9 +69,24 @@ Matrix<int> Solitaire::CreateIndexMat(const Matrix<bool>& boardShape){
 			}
 		}
 	}
+
 	return temp;
 }
 
+//TODO: Have not used -1 to signify no peg hole.
+int Solitaire::CreateIndexMat(Matrix<int>& indexMatrix, const Matrix<bool>& boardShape){
+	indexMatrix = Matrix<int>(boardShape.get_x_dim(), boardShape.get_y_dim());
+
+	int count = 0;
+
+	for (int i=0; i<boardShape.get_x_dim(); ++i)
+		for (int j=0; j<boardShape.get_y_dim(); ++j)
+			if (boardShape[i][j]){
+				indexMatrix[i][j] = count++;
+			}
+
+	return count;
+}
 
 Vector<bool> Solitaire::CreateStateVec(const Matrix<bool>& boardShape){
 	int count = 0;
@@ -91,6 +106,22 @@ Vector<bool> Solitaire::CreateStateVec(const Matrix<bool>& boardShape){
 	temp[count/2] = false;
 
 	return temp;
+}
+
+int Solitaire::create_index_and_state(const Matrix<bool>& boardShape, Matrix<int>& indexMat, Vector<bool>& stateVector){
+	int count = 0;
+
+	indexMat = Matrix<int>(boardShape.get_x_dim(), boardShape.get_y_dim());
+
+	for (int i=0; i<boardShape.get_x_dim(); ++i)
+		for (int j=0; j<boardShape.get_y_dim(); ++j)
+			if (boardShape[i][j])
+				indexMat[i][j] = count++;
+
+	stateVector = Vector<bool>(count);
+
+	return count;
+			
 }
 
 

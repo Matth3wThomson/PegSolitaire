@@ -25,9 +25,9 @@ public:
 
 	T at(int x, int y);
 
-	int get_x_dim(){ return x-1; };
-	int get_y_dim(){ return y; };
-	int get_NNZ(){ return IA[x-1]; };
+	int get_x_dim() const{ return x-1; };
+	int get_y_dim() const{ return y; };
+	int get_NNZ() const{ return IA[x-1]; };
 
 
 	friend std::ostream& operator<<(std::ostream& os, const YaleMatrix<T>& ym){

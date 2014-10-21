@@ -156,11 +156,14 @@ Vector<E> operator*(const YaleMatrix<E>& lhs, const Vector<E>& rhs){
 	if (lhs.y != rhs.size()) throw 
 		std::invalid_argument("Matrix/Vector multiplication requires same number of matrix columns to vector size");
 
-	Vector<E> temp(rhs.size());
+	Vector<E> temp(lhs.get_x_dim());
 
 	//For each possible row
 	for (int i=0; i<lhs.x-1; ++i)
+		//Loop through the elements on that row
 		for (int j = lhs.IA[i]; j < lhs.IA[i+1]; ++j)
+			//Adding the multiplication of the elements on that row with the 
+			//vector at the location of the column of the element to be multiplied
 			temp[i] += lhs.A[j] * rhs[lhs.JA[j]];
 		
 	return temp;

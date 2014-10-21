@@ -44,7 +44,12 @@ public:
 	static Matrix<bool> CreateEngBoard();
 	
 	static Matrix<int> CreateIndexMat(const Matrix<bool>& boardShape);
+	static int CreateIndexMat(Matrix<int>& indexMatrix, const Matrix<bool>& boardShape);
 	static Vector<bool> CreateStateVec(const Matrix<bool>& boardShape);
+
+	//Returns the number of pegs on the board. TODO: Untested
+	static int create_index_and_state(const Matrix<bool>& boardShape, Matrix<int>& indexMat,
+		Vector<bool>& stateVector);
 
 	static Matrix<int> CreateJumpMat(const Matrix<bool>& boardShape,
 		const Matrix<int>& indexMatrix, const int stateVectorLength);

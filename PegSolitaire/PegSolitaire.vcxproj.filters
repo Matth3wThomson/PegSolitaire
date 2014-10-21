@@ -18,13 +18,7 @@
     <ClInclude Include="Vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VectorDefinition.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Matrix.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MatrixDefinition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Solitaire.h">
@@ -36,11 +30,17 @@
     <ClInclude Include="YaleMatrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="YaleMatrixDef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Pagoda.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MatrixDefinition.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VectorDefinition.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="YaleMatrixDef.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
