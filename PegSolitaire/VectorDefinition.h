@@ -44,6 +44,8 @@ Vector<T>& Vector<T>::operator=(const Vector<T>& rhs){
 	for (int i=0; i<rhs.container_size; ++i){
 		arr[i] = rhs.arr[i];
 	}
+
+	return *this;
 }
 
 template<typename T>

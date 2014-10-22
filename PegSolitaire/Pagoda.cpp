@@ -27,6 +27,7 @@ Pagoda::~Pagoda(void)
 {
 }
 
+//TODO: Flexibility?
 bool Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>& bps){
 	std::ifstream file = std::ifstream();
 
@@ -85,18 +86,9 @@ bool Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>&
 		}
 
 		if (temp == "PAGODA:"){
-
-			//Pagoda becomes aware of the pagoda function
-			this->pagodaFunctions.push_back(Vector<int>(pegHoles)); 
-
-			//Allows pagoda combination to keep track of pagoda function that proves
-			//insolvability for its start and end cases
-
-			//Loses track of its pointer after each iteration, as whenever a vector is modified
-			//all elements 
-			bps.back().pagodaFunction = &this->pagodaFunctions.back(); 
-
-			load_vector_from_board(file, this->pagodaFunctions.back());
+			bps.back().pagoda = Vector<int>(pegHoles);
+			bps.back().hasPagoda = true;
+			load_vector_from_board(file, bps.back().pagoda);
 
 			file >> temp;
 		}
@@ -176,9 +168,9 @@ std::ostream& Pagoda::printPagCom(std::ostream& os, const Pagoda::BoardPair& bp,
 	os << "END: " << std::endl;
 	this->print_vector_as_board(os, bp.endState);
 
-	if (bp.pagodaFunction){
+	if (bp.hasPagoda){
 		os << "PAGODA: " << std::endl;
-		this->print_vector_as_board(os, *bp.pagodaFunction);
+		this->print_vector_as_board(os, bp.pagoda);
 	}
 
 	return os;
@@ -339,6 +331,8 @@ bool Pagoda::generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState){
 				std::cout << "End: " << endStateVec << std::endl;
 				std::cout << "Fix: " << fixedVector << std::endl << std::endl;*/
 
+
+				//TODO: Should this set the pagoda to null before trying to return?
 				return false;
 			}
 		}
@@ -373,7 +367,7 @@ bool Pagoda::verify_pagoda(const Vector<int>& pagoda){
 //};
 
 bool Pagoda::prove_insolvable(const BoardPair& bp){
-	return ((bp.startState - bp.endState)* *bp.pagodaFunction < 0);
+	return ((bp.startState - bp.endState)* bp.pagoda< 0);
 }
 
 //TODO: use true random?
@@ -390,7 +384,47 @@ Vector<int> Pagoda::create_random_state_vector(const Matrix<bool>& board){
 	return temp;
 }
 
-//void Pagoda::randomize_start_and_end(){
-//	startStateVec = create_random_state_vector(board);
-//	endStateVec = create_random_state_vector(board);
-//}
+//TODO: Passing out a board pair means creating a copy.
+//There are lots of places where the copy constructor of board pair is called....
+//Implement a move constructor for it?
+Pagoda::BoardPair Pagoda::create_random_board_pair(int i){
+
+	//Start configurations of 33-i pegs
+	//End configurations of i pegs
+	// 1 < i <= 16
+	i %= (pegHoles / 2);
+	++i;
+
+	int start = i;
+	int end = i;
+
+	//Create a boardPair to start with
+	BoardPair b = BoardPair(pegHoles);
+
+	//Fill in all our start pegs
+	for (int i=0; i<pegHoles; ++i)
+		b.startState[i] = 1;
+
+	//Keep looking for random places in the vector to take a peg from
+	while (start > 0){
+		int randomNo = rand() % pegHoles;
+
+		//Only decrement if it wasnt already empty
+		if (b.startState[randomNo] != 0){
+			b.startState[randomNo] = 0;
+			start--;
+		}
+	}
+
+	//Keep looking for random places in the vector to insert a peg
+	while (end > 0){
+		int randomNo = rand() % pegHoles;
+
+		if (b.endState[randomNo] != 1){
+			b.endState[randomNo] = 1;
+			end--;
+		}
+	}
+
+	return b;
+}
