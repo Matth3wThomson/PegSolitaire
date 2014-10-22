@@ -7,6 +7,7 @@
 #include <iostream>
 #include <stdexcept>
 
+//Forward Declaration
 template<typename T>
 class YaleMatrix;
 

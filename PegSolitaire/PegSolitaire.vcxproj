@@ -26,6 +26,9 @@
     <ClCompile Include="Pagoda.cpp" />
     <ClCompile Include="Solitaire.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="results.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7B86513C-91FF-4F39-9115-C432E12DF8E3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

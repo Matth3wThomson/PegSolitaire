@@ -1,7 +1,6 @@
 #include "Pagoda.h"
 
 
-//TODO: Test this
 Pagoda::Pagoda(bool eng){
 	//Create board
 	if (eng) board = Solitaire::CreateEngBoard();
@@ -13,12 +12,6 @@ Pagoda::Pagoda(bool eng){
 	//Create the jump matrix
 	jumpMat = Solitaire::CreateJumpMat(board, indexMat, pegHoles);
 
-	//TODO: Remove
-	/*std::cout << "Board Shape:\n" << board << std::endl;
-	std::cout << "Index Matrix:\n" << indexMat << std::endl;
-	std::cout << "Jump Matrix:\n" << jumpMat << std::endl;
-	std::cout << "Start State:\n" << startStateVec << std::endl;
-	std::cout << "End State:\n" << endStateVec << std::endl;*/
 }
 
 Pagoda::Pagoda(const Matrix<bool>& boardShape)
@@ -34,22 +27,7 @@ Pagoda::~Pagoda(void)
 {
 }
 
-//bool Pagoda::set_start_state(const Vector<int>& start){
-//	//TODO: NOT SUITABLE CHECK YET
-//	if (start.size() != startStateVec.size()) return false;
-//
-//	startStateVec = start;
-//	return true;
-//}
-//
-//bool Pagoda::set_end_state(const Vector<int>& end){
-//	if (endStateVec.size() != end.size()) return false;
-//
-//	endStateVec = end;
-//	return true;
-//}
-
-bool Pagoda::load_from_file(const std::string& filename, std::vector<PagodaCombination>& pcs){
+bool Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>& bps){
 	std::ifstream file = std::ifstream();
 
 	file.open(filename.c_str());
@@ -92,27 +70,38 @@ bool Pagoda::load_from_file(const std::string& filename, std::vector<PagodaCombi
 
 
 		if (temp == "START:"){
-			pcs.push_back(PagodaCombination(pegHoles));
-			load_vector_from_board(file, pcs.back().startState);
+			bps.push_back(BoardPair(pegHoles));
+			load_vector_from_board(file, bps.back().startState);
+
+			file >> temp;
 		}
 
-		file >> temp;
 
-		if (temp == "END:")
-			load_vector_from_board(file, pcs.back().endState);
 
-		file >> temp;
+		if (temp == "END:"){
+			load_vector_from_board(file, bps.back().endState);
 
-		if (temp == "PAGODA"){
+			file >> temp;
+		}
+
+		if (temp == "PAGODA:"){
+
 			//Pagoda becomes aware of the pagoda function
-			this->pagodaFunctions.push_back(new Vector<int>(pegHoles));
+			this->pagodaFunctions.push_back(Vector<int>(pegHoles)); 
 
-			//Allows pagoda combination to keep track of pagoda function
-			pcs.back().pagodaFunction = this->pagodaFunctions.back();
-			load_vector_from_board(file, *pcs.back().pagodaFunction);
+			//Allows pagoda combination to keep track of pagoda function that proves
+			//insolvability for its start and end cases
+
+			//Loses track of its pointer after each iteration, as whenever a vector is modified
+			//all elements 
+			bps.back().pagodaFunction = &this->pagodaFunctions.back(); 
+
+			load_vector_from_board(file, this->pagodaFunctions.back());
+
+			file >> temp;
 		}
 
-	} 
+	}
 
 	return true;
 }
@@ -120,6 +109,8 @@ bool Pagoda::load_from_file(const std::string& filename, std::vector<PagodaCombi
 //TODO: These functions dont request that vectors be of the correct length
 template<typename E>
 void Pagoda::load_vector_from_board(std::istream& is, Vector<E>& v){
+
+	if (v.size() != pegHoles) throw std::invalid_argument("Cannot load vector from board. Vector must have correct size");
 
 	char getme;
 
@@ -133,7 +124,7 @@ void Pagoda::load_vector_from_board(std::istream& is, Vector<E>& v){
 
 }
 
-bool Pagoda::print_to_file(const std::string& filename, const PagodaCombination& pc, bool append){
+bool Pagoda::print_to_file(const std::string& filename, const BoardPair& bp, bool append){
 	std::ofstream file = std::ofstream();
 
 	if (append)
@@ -143,7 +134,7 @@ bool Pagoda::print_to_file(const std::string& filename, const PagodaCombination&
 
 	if (!file.is_open()) return false;
 
-	printPagCom(file, pc, append);
+	printPagCom(file, bp, append);
 	file.close();
 
 	return true;
@@ -164,7 +155,7 @@ std::ostream& operator<<(std::ostream& os, const Pagoda& p){
 	return os;
 }
 
-std::ostream& Pagoda::printPagCom(std::ostream& os, const Pagoda::PagodaCombination& pc, const bool append){
+std::ostream& Pagoda::printPagCom(std::ostream& os, const Pagoda::BoardPair& bp, const bool append){
 
 	if (!append){
 		os << "WIDTH " << this->board.get_width() << std::endl;
@@ -180,14 +171,14 @@ std::ostream& Pagoda::printPagCom(std::ostream& os, const Pagoda::PagodaCombinat
 	}
 
 	os << "START: " << std::endl;
-	this->print_vector_as_board(os, pc.startState);
+	this->print_vector_as_board(os, bp.startState);
 
 	os << "END: " << std::endl;
-	this->print_vector_as_board(os, pc.endState);
+	this->print_vector_as_board(os, bp.endState);
 
-	if (pc.pagodaFunction){
+	if (bp.pagodaFunction){
 		os << "PAGODA: " << std::endl;
-		this->print_vector_as_board(os, *pc.pagodaFunction);
+		this->print_vector_as_board(os, *bp.pagodaFunction);
 	}
 
 	return os;
@@ -288,17 +279,17 @@ bool Pagoda::generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState){
 	//works for that combination.
 
 	/*if (pagoda){
-		if (verify_pagoda(*pagoda)) return true;
-		else delete pagoda;
+	if (verify_pagoda(*pagoda)) return true;
+	else delete pagoda;
 	}
-	
+
 	pagodaFunctions.push_back(new Vector<int>(endState));
 	pagoda = pagodaFunctions.back();
 	*/
 
 
 	pagoda = Vector<int>(pegHoles);
-	
+
 	/*Vector<int> pagoda(endStateVec);*/
 	Vector<bool> fixedVector(pagoda.size()); //True if fixed, false if not. TODO: Native array?
 
@@ -365,7 +356,6 @@ bool Pagoda::generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState){
 }
 
 
-//TODO: Test this! THINK THIS IS NOW WORKING
 bool Pagoda::verify_pagoda(const Vector<int>& pagoda){
 	//NO NEED TO TRANSPOSE! (Jump matrix is already in jump*location format)
 	Vector<int> x = (jumpMat * pagoda);
@@ -382,8 +372,8 @@ bool Pagoda::verify_pagoda(const Vector<int>& pagoda){
 //	return ((startStateVec - endStateVec)*pagoda < 0);
 //};
 
-bool Pagoda::prove_insolvable(const PagodaCombination& pc){
-	return ((pc.startState - pc.endState)* *pc.pagodaFunction < 0);
+bool Pagoda::prove_insolvable(const BoardPair& bp){
+	return ((bp.startState - bp.endState)* *bp.pagodaFunction < 0);
 }
 
 //TODO: use true random?

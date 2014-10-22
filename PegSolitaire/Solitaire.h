@@ -70,13 +70,6 @@ private:
 	Matrix<int> indexMatrix;
 	YaleMatrix<int> sparseJumpMat;
 
-	/*struct jump {
-		int startIndex, midIndex, endIndex;
-
-		jump(int start = 0, int mid = 0, int end = 0):
-		startIndex(start), midIndex(mid), endIndex(end){ };
-	};*/
-
 	void PrintBoard(std::ostream& os) const;
 
 

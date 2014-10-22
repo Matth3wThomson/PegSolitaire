@@ -10,22 +10,22 @@ class Pagoda
 {
 public:
 
-	struct PagodaCombination {
+	struct BoardPair {
 		//A pair of start and end states, and a pointer to a pagoda function that solves them
 		Vector<int>* pagodaFunction;
 		Vector<int> startState;
 		Vector<int> endState;
 
-		PagodaCombination():
+		BoardPair():
 			pagodaFunction(NULL){};
 
-		PagodaCombination(int size):
+		BoardPair(int size):
 			pagodaFunction(NULL){
 				startState = Vector<int>(size);
 				endState = Vector<int>(size);
 		};
 
-		//NOTE: No destructor here for the pointer, as pagodaCombination does not have ownership
+		//NOTE: No destructor here for the pointer, as BoardPair does not have ownership
 		//over its pagoda functions
 	};
 
@@ -36,18 +36,18 @@ public:
 	/*bool set_start_state(const Vector<int>& start);
 	bool set_end_state(const Vector<int>& end);*/
 
-	bool load_from_file(const std::string& filename, std::vector<PagodaCombination>& pcs);
-	bool print_to_file(const std::string& filename, const PagodaCombination& pc, bool append = false);
+	bool load_from_file(const std::string& filename, std::vector<BoardPair>& bps);
+	bool print_to_file(const std::string& filename, const BoardPair& bp, bool append = false);
 
 	friend std::ostream& operator<<(std::ostream& os, const Pagoda& p);
-	std::ostream& printPagCom(std::ostream& os, const PagodaCombination& pc, const bool append = false);
+	std::ostream& printPagCom(std::ostream& os, const BoardPair& bp, const bool append = false);
 	
 
 	/*bool generate_pagoda(Vector<int>& pagoda);*/
 	bool generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState);
 	bool verify_pagoda(const Vector<int>& pagoda);
 	/*bool prove_insolvable(const Vector<int>& pagoda);*/
-	bool prove_insolvable(const PagodaCombination& pc);
+	bool prove_insolvable(const BoardPair& bp);
 
 	static Vector<int> create_random_state_vector(const Matrix<bool>& board);
 
@@ -63,8 +63,8 @@ private:
 	Matrix<int> indexMat;
 	YaleMatrix<int> jumpMat;
 
-	//Should this be pointers?
-	std::vector<Vector<int>*> pagodaFunctions;
+	//Not pointers, as vectors utilize the heap anyway!
+	std::vector<Vector<int>> pagodaFunctions;
 
 	template<typename E>
 	void print_vector_as_board(std::ostream& os, const Vector<E>& v);
