@@ -2,7 +2,13 @@
 
 #include "Pagoda.h"
 #include <thread>
+#include <queue>
 #include <mutex>
+
+//TODO: Explain why there seems to be such a mess of crap in this class...
+
+//TODO: Fix the new cool way of doing threads. NOT FINDING SOLUTIONS FOR SOME REASON.
+//Also much bugs with memory leaks etc... I must be doing something wrong with lambdas?
 
 class PagodaTester
 {
@@ -10,23 +16,37 @@ public:
 	PagodaTester(int threads = 1);
 	~PagodaTester(void);
 
-	//Randomly generates boards and tests them
-	void test(int numberOfTests, const std::string& outputFile);
+	//Performs tests sequentially on randomly generated boards
+	void sequentialTest(int numberOfTests, const std::string& outputFile = "");
 
-	//Takes board configurations from a file and outputs and discrepancies
-	void test(const std::string& inputFilename, const std::string& outputFilename = "");
+	//Performs tests sequentially on boards read from a file
+	void sequentialTest(const std::string& inputFilename, const std::string& outputFilename = "");
 
+	//Reads boards from a file and outputs to another file boards that are not verified pagodas
+	void verifyFile(const std::string& inputFilename, const std::string& outputFilename = "");
 
+	//Randomly generates boards and tests them on all cores
+	void Threadedtest(int numberOfTests, int batchSize = 100, const std::string& outputFile = "");
+
+	//Randomly generates boards and tests them on all cores using a different threading system
+	void ThreadedtestType2(int numberOfTests, int batchSize = 100, const std::string& outputFile = "");
+
+	//Performs tests across all cores from boards read from file
+	void Threadedtest(const std::string& inputFilename, const std::string& outputFilename = "");
+
+	friend std::ostream& operator<<(std::ostream& os, const PagodaTester& p);
 private:
 
 	
 
 	int threads;
+	//1 over prodConsRat is the number of producers to consumers
+	int prodConsRat;
 	Pagoda p;
 
 	//List of boards to be tested.
 	//Shared mutex is a C++14 thing! :/
-	std::mutex jobMutex;
+	std::mutex testsMutex;
 	std::vector<Pagoda::BoardPair> tests;
 
 	//How to keep track of how many tests need to be created
@@ -40,20 +60,31 @@ private:
 	//List of boards to be output to results file
 	std::mutex insolvableMut;
 	std::vector<Pagoda::BoardPair> results;
-	std::string outputFile;
+	/*std::string outputFile;*/ //TODO: Work out if this is even necessary
 	int insolvableProved;
 
 	std::mutex verifiedMut;
 	int verifiedPagodas;
 
-
 	std::vector<std::thread> threadArray;
-	
-	
 
 	//The function that threads should execute to "do a test"
 	void consumer(int batchSize, bool recordResults = false);
 	void producer(int batchSize, int totalTests);
+
+	//Another version of multithreading
+	void produceAndConsume(int tests, bool recordResults = false);
+
+	//Acquire job function
+	void acquire_job();
+
+	//TODO: If time, make this into function pointers...
+	// http://stackoverflow.com/questions/4880308/is-it-possible-to-save-a-function-pointer-into-an-object
+
+	//http://stackoverflow.com/questions/22109555/c-queue-of-functions
+
+	std::mutex jobMutex;
+	std::queue<std::function<void()>> jobs;
 
 	bool consumerQuit;
 	bool producerQuit;

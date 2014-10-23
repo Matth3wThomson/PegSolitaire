@@ -29,6 +29,14 @@ public:
 				endState = Vector<int>(size);
 		};
 
+		/*BoardPair& operator=(const BoardPair& rhs){
+			this->pagoda = rhs.pagoda;
+			this->startState = rhs.startState;
+			this->endState = rhs.endState;
+			this->hasPagoda = rhs.hasPagoda;
+			return *this;
+		}*/
+
 		~BoardPair(){  }
 
 		//NOTE: No destructor here for the pointer, as BoardPair does not have ownership
@@ -47,19 +55,20 @@ public:
 
 	friend std::ostream& operator<<(std::ostream& os, const Pagoda& p);
 	std::ostream& printPagCom(std::ostream& os, const BoardPair& bp, const bool append = false);
-	
-	//0 insolvable, 1 invalid pagoda supplied, 2 cannot proved insolvability from pagoda supplied
-	//3 generated
-	int attempt_prove_insolvable(BoardPair& bp);
+
 
 	/*bool generate_pagoda(Vector<int>& pagoda);*/
 	bool generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState);
 	bool verify_pagoda(const Vector<int>& pagoda);
-	/*bool prove_insolvable(const Vector<int>& pagoda);*/
+	
+	//Will just try to prove that your board is insolvable with the pagoda function
 	bool prove_insolvable(const BoardPair& bp);
 
+	//Will use all known pagodas to try prove insolvability of your states
+	bool prove_insolv_with_saved(const BoardPair& bp);
+
 	static Vector<int> create_random_state_vector(const Matrix<bool>& board);
-	BoardPair create_random_board_pair(int i);
+	BoardPair create_random_board_pair(int i) const;
 
 	/*void randomize_start_and_end();*/
 

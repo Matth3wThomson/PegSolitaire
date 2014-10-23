@@ -1,6 +1,10 @@
 #include "PagodaTester.h"
 
 
+//Is having all my individual tests as a global vector a good idea, and having a number
+// of threads producing a consuming tests, each
+//thread collecting an amount from the global variable a good idea?
+
 PagodaTester::PagodaTester(int t)
 {
 	p = Pagoda();
@@ -12,6 +16,12 @@ PagodaTester::PagodaTester(int t)
 	else if (t > hardwareThreads) threads = hardwareThreads;
 	else threads = t;
 
+	consumerQuit = false;
+	producerQuit = false;
+	testsCreated = 0;
+	testsCompleted = 0;
+	insolvableProved = 0;
+	verifiedPagodas = 0;
 
 }
 
@@ -21,10 +31,190 @@ PagodaTester::~PagodaTester(void)
 
 }
 
-void PagodaTester::test(int numberOfTests, const std::string& outputFile){
+void PagodaTester::sequentialTest(int numberOfTests, const std::string& outputFile){
+	p = Pagoda();
+	tests.reserve(numberOfTests);
 
-	//main thread generating jobs and multiple thread consuming?
+	for (int i=0; i<numberOfTests; ++i){
+		tests.push_back(p.create_random_board_pair(rand()));
+		testsCreated++;
+		if (testsCreated % 10000 == 0) std::cout << "Tests created: " << testsCreated << std::endl;
+	}
 
+	std::cout << "Tests creation complete: " << testsCreated << std::endl;
+
+	for (int i=0; i<numberOfTests; ++i){
+		if (!tests.back().hasPagoda){
+			tests.back().hasPagoda = p.generate_pagoda(tests.back().pagoda, tests.back().endState);
+		}
+
+		if (tests.back().hasPagoda){
+
+			if (p.verify_pagoda(tests.back().pagoda)){
+				verifiedPagodas++;
+
+				if (p.prove_insolvable(tests.back())){
+					insolvableProved++;
+					results.push_back(tests.back());
+				}
+			}
+		}
+		testsCompleted++;
+		tests.pop_back();
+		if (testsCompleted % 10000 == 0) std::cout << "Tests completed: " << testsCompleted << std::endl;
+	}
+
+	if (outputFile != "")
+		for (unsigned int i=0; i<results.size(); ++i)
+			if (!p.print_to_file(outputFile, results[i], ((bool) i))){
+				std::cout << "File not found.";
+				break;
+			}
+
+			std::cout << *this << std::endl;
+
+};
+
+void PagodaTester::verifyFile(const std::string& inputFilename, const std::string& outputFilename){
+	p = Pagoda();
+
+	//Attempts to load from file
+	if (!p.load_from_file(inputFilename, tests)) throw std::invalid_argument("Input file could not be found!");
+
+	bool writeToFile = outputFilename != "";
+
+	//If you want to write to file it checks that it is there before commencing tests
+	if (writeToFile){
+		std::fstream file = std::fstream();
+		file.open(outputFilename);
+
+		if (!file.is_open()) throw std::invalid_argument("Output file not found!");
+		else file.close();
+	}
+
+	for (int i=0; i<tests.size(); ++i){
+
+		if (tests.back().hasPagoda){
+
+			if (!p.verify_pagoda(tests.back().pagoda)){
+				results.push_back(tests.back());
+			}
+
+		}
+
+		testsCompleted++;
+		tests.pop_back();
+		if (testsCompleted % 10000 == 0) std::cout << "Tests completed: " << testsCompleted << std::endl;
+
+	}
+
+	for (int i=0; i<results.size(); ++i){
+		p.print_to_file(outputFilename, results[i], i);
+	}
+}
+
+void PagodaTester::sequentialTest(const std::string& inputFilename, const std::string& outputFilename){
+
+	p = Pagoda();
+
+	//Attempts to load from file
+	if (!p.load_from_file(inputFilename, tests)) throw std::invalid_argument("Input file could not be found!");
+
+	bool writeToFile = outputFilename != "";
+
+	//If you want to write to file it checks that it is there before commencing tests
+	if (writeToFile){
+		std::fstream file = std::fstream();
+		file.open(outputFilename);
+
+		if (!file.is_open()) throw std::invalid_argument("Output file not found!");
+		else file.close();
+	}
+
+	for (int i=0; i<tests.size(); ++i){
+
+		if (!tests.back().hasPagoda){
+			tests.back().hasPagoda = p.generate_pagoda(tests.back().pagoda, tests.back().endState);
+		}
+
+		if (tests.back().hasPagoda){
+
+			if (p.verify_pagoda(tests.back().pagoda)){
+				verifiedPagodas++;
+
+				if (p.prove_insolvable(tests.back())){
+					insolvableProved++;
+					results.push_back(tests.back());
+				}
+			}
+		}
+
+		testsCompleted++;
+		tests.pop_back();
+		if (testsCompleted % 10000 == 0) std::cout << "Tests completed: " << testsCompleted << std::endl;
+
+	}
+
+	for (int i=0; i<results.size(); ++i){
+		p.print_to_file(outputFilename, results[i], i);
+	}
+
+	
+};
+
+void PagodaTester::Threadedtest(int numberOfTests, int batchSize, const std::string& outputFile){
+
+	p = Pagoda();
+
+	consumerQuit = false;
+	producerQuit = false;
+	testsCreated = 0;
+	testsCompleted = 0;
+	insolvableProved = 0;
+	verifiedPagodas = 0;
+
+	if (numberOfTests > 1000000) tests.reserve(1000000);
+	else tests.reserve(numberOfTests);
+
+	//1 over prodConsRat is the number of producers to consumers
+	prodConsRat = 4;
+
+	//If threaded
+	if (threads != 1){
+
+		//Create half producer threads and half consumer threads
+		for (int i=1; i<threads; ++i){
+			if (i<threads/prodConsRat)
+				threadArray.push_back(std::thread(&PagodaTester::producer, this, batchSize, numberOfTests));
+			else
+				threadArray.push_back(std::thread(&PagodaTester::consumer, this, batchSize, false));
+		}
+
+		std::cout << "Threads started: " << threads-1 << std::endl;
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+		//Start producing results
+		producer(100, numberOfTests);
+
+		std::cout << "Producing finished. Created: " << testsCreated << std::endl;
+
+		while (!consumerQuit){
+			if (testsCreated <= testsCompleted) consumerQuit = true;
+		}
+
+		//Join with all threads created
+		for (unsigned int i=0; i<threadArray.size(); ++i){
+			if (threadArray[i].joinable()) threadArray[i].join();
+		}
+
+		std::cout << "Number of tests created: " << testsCreated << std::endl;
+		std::cout << "Number of tests completed: " << testsCompleted << std::endl;
+		std::cout << "Verified Pagodas: " << verifiedPagodas << std::endl;
+		std::cout << "Insolvable found: " << insolvableProved << std::endl;
+
+	} else {
+		sequentialTest(numberOfTests, outputFile);
+	}
 	//create producer threads
 	//create consumer threads
 
@@ -35,7 +225,74 @@ void PagodaTester::test(int numberOfTests, const std::string& outputFile){
 	//while (!consumerQuit){
 	//if tests Created <= tests Completed then let consumers close
 	//}
-	
+
+}
+
+void PagodaTester::ThreadedtestType2(int numberOfTests, int batchSize, const std::string& outputFile){
+
+	std::cout << numberOfTests << " " << batchSize << std::endl;
+
+	p = Pagoda();
+
+	verifiedPagodas = 0;
+	insolvableProved = 0;
+	consumerQuit = false;
+
+	//TODO: Make this try to open the file first
+	bool recordResults = outputFile != "";
+
+	//Check if the file is actually valid
+	if (recordResults){
+		std::ifstream file = std::ifstream();
+		file.open(outputFile);
+		if (!file.is_open()) throw std::invalid_argument("Output file entered was not found");
+	}
+
+	if (threads == 1) sequentialTest(numberOfTests, outputFile);
+	else {
+
+		//Start all threads
+		for (int i=0; i<threads; ++i){
+			threadArray.push_back(std::thread(&PagodaTester::acquire_job, this));
+			std::cout << "Started thread " << i << std::endl;
+		}
+
+		//Push all of the jobs onto the queue
+		while (numberOfTests > batchSize){
+			//Jobs is a queue of functions with no parameters
+			jobMutex.lock();
+			//jobs.push(jobStruct(batchSize, recordResults));
+			jobs.push( [this, batchSize, recordResults] { this->produceAndConsume(batchSize, recordResults); });
+			jobMutex.unlock();
+			numberOfTests -= batchSize;
+		}
+
+		jobMutex.lock();
+		jobs.push( [this, batchSize, recordResults] { this->produceAndConsume(batchSize, recordResults);});
+		jobMutex.unlock();
+
+		std::cout << "Pushed all jobs onto job list" << std::endl;
+
+		//While jobs remain sleep the main thread
+		while (!jobs.empty()){
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		}
+
+		//Stop threads when finished.
+		consumerQuit = true;
+
+		//Print the results to file
+		for (int i=0; i<results.size(); ++i){
+			p.print_to_file(outputFile, results[i], i);
+		}
+
+		std::cout << *this << std::endl;
+	}
+
+}
+
+void PagodaTester::Threadedtest(const std::string& inputFilename, const std::string& outputFilename){
+
 }
 
 //TODO: if you find a result, print to file if requested
@@ -46,7 +303,7 @@ void PagodaTester::consumer(int batchSize, bool recordResults){
 	while (!consumerQuit){
 
 		//Try to acquire jobs
-		if (jobMutex.try_lock()){
+		if (testsMutex.try_lock()){
 
 			//Collect all jobs possible until you reach your batch size
 			//or there are no jobs left...
@@ -55,7 +312,7 @@ void PagodaTester::consumer(int batchSize, bool recordResults){
 				tests.pop_back();
 			}
 
-			jobMutex.unlock();
+			testsMutex.unlock();
 		}
 
 		int internalTestsComplete = 0;
@@ -81,7 +338,7 @@ void PagodaTester::consumer(int batchSize, bool recordResults){
 						//Let the program know you have found a problem that can be proved insolvable
 						insolvableMut.lock();
 						insolvableProved++;
-						results.push_back(internalTests.back());
+						if (recordResults) results.push_back(internalTests.back());
 						insolvableMut.unlock();
 
 					}
@@ -89,6 +346,7 @@ void PagodaTester::consumer(int batchSize, bool recordResults){
 			}
 
 			//Keep track of all tests you do internally
+			internalTests.pop_back();
 			internalTestsComplete++;
 
 		}
@@ -137,16 +395,85 @@ void PagodaTester::producer(int batchSize, int totalTests){
 				internalTests.push_back(p.create_random_board_pair(rand()));
 			}
 
+			//Need to check if the vector isnt over max size before trying to allocate
+
 			//Acquire the lock to put the tests you have created into
 			//the job list
-			jobMutex.lock();
+			testsMutex.lock();
 			while (!internalTests.empty()){
 				tests.push_back(internalTests.back());
 				internalTests.pop_back();
 			}
-			jobMutex.unlock();
+			testsMutex.unlock();
 		}
 
 	}
 }
 
+void PagodaTester::produceAndConsume(int tests, bool recordResults){
+
+	//There is a big bug here!! 
+	/*Pagoda::BoardPair bp;*/
+
+		//Do the allocated number of tests
+		while (tests > 0){
+
+			//Create a random board pair
+			Pagoda::BoardPair bp = p.create_random_board_pair(100);	
+
+			//Attempt pagoda generation
+			if (p.generate_pagoda(bp.pagoda, bp.endState)){
+				verifiedMut.lock();
+				verifiedPagodas++;
+				verifiedMut.unlock();
+				bp.hasPagoda = true;
+			};
+
+			if (bp.hasPagoda){
+
+				//TODO: Then try to prove the board pair is insolvable
+				/*if (p.prove_insolv_with_saved(bp)){*/
+				if (p.prove_insolvable(bp)){
+
+					insolvableMut.lock();
+					insolvableProved++;
+					if (recordResults) results.push_back(bp);
+					insolvableMut.unlock();
+
+				};
+			}
+			tests--;
+		}
+	
+	
+}
+
+void PagodaTester::acquire_job(){
+
+	std::function<void()> func = std::function<void()>();
+
+	while (!consumerQuit){
+
+		//Try to acquire a job from the job queue
+		jobMutex.lock();
+		if (!jobs.empty()){
+			func = jobs.front();
+			jobs.pop();
+		}
+		jobMutex.unlock();
+
+		//Execute the job
+		if (func)
+			func();
+
+	}
+
+}
+
+std::ostream& operator<<(std::ostream& os, const PagodaTester& p){
+	os << "Number of tests created: " << p.testsCreated << std::endl;
+	os << "Number of tests completed: " << p.testsCompleted << std::endl;
+	os << "Verified Pagodas: " << p.verifiedPagodas << std::endl;
+	os << "Insolvable found: " << p.insolvableProved;
+	return os;
+}

@@ -280,7 +280,7 @@ bool Pagoda::generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState){
 	*/
 
 
-	pagoda = Vector<int>(pegHoles);
+	pagoda = Vector<int>(endState);
 
 	/*Vector<int> pagoda(endStateVec);*/
 	Vector<bool> fixedVector(pagoda.size()); //True if fixed, false if not. TODO: Native array?
@@ -370,6 +370,18 @@ bool Pagoda::prove_insolvable(const BoardPair& bp){
 	return ((bp.startState - bp.endState)* bp.pagoda< 0);
 }
 
+bool Pagoda::prove_insolv_with_saved(const BoardPair& bp){
+	if (prove_insolvable(bp)) return true;
+
+	//TODO: recognise possible threading issue here
+	for (unsigned int i=0; i<this->pagodaFunctions.size(); ++i){
+		if ((bp.startState - bp.endState) * pagodaFunctions[i] < 0) return true;
+	}
+
+	return false;
+
+}
+
 //TODO: use true random?
 Vector<int> Pagoda::create_random_state_vector(const Matrix<bool>& board){
 	int count = 0;
@@ -387,7 +399,7 @@ Vector<int> Pagoda::create_random_state_vector(const Matrix<bool>& board){
 //TODO: Passing out a board pair means creating a copy.
 //There are lots of places where the copy constructor of board pair is called....
 //Implement a move constructor for it?
-Pagoda::BoardPair Pagoda::create_random_board_pair(int i){
+Pagoda::BoardPair Pagoda::create_random_board_pair(int i) const{
 
 	//Start configurations of 33-i pegs
 	//End configurations of i pegs
