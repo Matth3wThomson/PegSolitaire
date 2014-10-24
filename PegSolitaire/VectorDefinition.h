@@ -36,14 +36,18 @@ Vector<T>& Vector<T>::operator=(const Vector<T>& rhs){
 	//Release old memory
 	delete[] arr;
 
+	this->container_size = rhs.container_size;
+
 	//allocate new memory
 	arr = new T[container_size];
 	memset(this->arr, 0, (container_size * sizeof(T)));
 
 	//Copy Values
-	for (int i=0; i<rhs.container_size; ++i){
+	/*for (int i=0; i<rhs.container_size; ++i){
 		arr[i] = rhs.arr[i];
-	}
+	}*/
+
+	memcpy_s(arr, (container_size*sizeof(T)), rhs.arr, (container_size*sizeof(T)));
 
 	return *this;
 }

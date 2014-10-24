@@ -25,9 +25,17 @@ public:
 
 		BoardPair(int size):
 			hasPagoda(false){
+				pagoda = Vector<int>();
 				startState = Vector<int>(size);
 				endState = Vector<int>(size);
 		};
+
+		BoardPair(BoardPair&& rval){
+			std::swap(pagoda, rval.pagoda);
+			std::swap(startState, rval.startState);
+			std::swap(endState, rval.endState);
+			std::swap(hasPagoda, rval.hasPagoda);
+		}
 
 		/*BoardPair& operator=(const BoardPair& rhs){
 			this->pagoda = rhs.pagoda;
@@ -38,9 +46,6 @@ public:
 		}*/
 
 		~BoardPair(){  }
-
-		//NOTE: No destructor here for the pointer, as BoardPair does not have ownership
-		//over its pagoda functions
 	};
 
 	Pagoda(bool eng = 1);

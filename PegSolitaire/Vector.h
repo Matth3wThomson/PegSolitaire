@@ -58,11 +58,24 @@ public:
 	Vector<T>& operator-=(const Vector<T>& rhs);
 
 	//Insertion
-	inline void insert_element(const T& element, const int location){ arr[location] = element; };
+	inline void insert_element(const T& element, const int location){ 
+		if (location < 0 || location >= container_size)
+			return;
+		arr[location] = element;
+	};
 
 	//Access
-	inline T& at(const int location){ return arr[location]; };
-	inline T& operator[](int location) const{ return arr[location]; };
+	inline T& at(const int location){
+		if (location < 0 || location >= container_size)
+			return arr[0];
+		return arr[location];
+	};
+
+	inline T& operator[](int location) const{ 
+		if (location < 0 || location >= container_size)
+			return arr[0];
+		return arr[location];
+	};
 
 	//Size of Vector
 	inline int size() const{ return container_size; };

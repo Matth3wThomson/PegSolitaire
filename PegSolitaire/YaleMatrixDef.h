@@ -36,6 +36,8 @@ YaleMatrix<T>::YaleMatrix(YaleMatrix<T>&& rval):
 //ASSIGNMENT OPERATOR
 template<typename T>
 YaleMatrix<T>& YaleMatrix<T>::operator=(const YaleMatrix<T>& rhs){
+	if (this == &rhs) return (*this);
+
 	delete[] A;
 	delete[] IA;
 	delete[] JA;

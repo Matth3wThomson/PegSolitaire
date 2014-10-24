@@ -78,9 +78,15 @@ public:
 	//Insertion
 	inline void set_element(const int x, const int y, const T& elem){ mat[x][y] = elem; };
 
+	//TODO: Remove guards
+
 	//Access
 	inline T& get_element(const int x, const int y){ return mat[x][y]; };
-	inline T* operator[](const int location) const{ return mat[location]; };
+	inline T* operator[](const int location) const{ 
+		if (location < 0 || location >= x)
+			return mat[0];
+		return mat[location]; 
+	};
 
 	//Size operations
 	inline int get_x_dim() const{ return x; };
