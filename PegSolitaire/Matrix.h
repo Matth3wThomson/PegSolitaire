@@ -16,8 +16,6 @@
 		-Evaulate pass by reference used... Lots of matrices are bools (slower to pass 4 bytes than
 		 1 bit) 
 		-Test mathematical operators
-		-Test determinant+ transpose
-		-Implement Inverse
 		-Implement vector/matrix functionality
 		-Make assignment operators more efficient
 
@@ -25,6 +23,10 @@ NOTES:
 		-Performance of exceptions that arent thrown or caught identical to functions that dont throw,
 		 therefore exceptions used on functions where matrices must be of identical size, as program
 		 crash is desired. (BENCHMARK: 10000 valid add operations)
+		-Division of matrices not done since it is technically the multiplication of the inverse,
+		 and the inverse of a matrix isn't easy to compute!
+		-There are functions with duplicate purposes, this is simply to make the class easier to
+		 understand from outside the class
 */
 
 
@@ -47,8 +49,6 @@ public:
 	Matrix<T>& operator=(Matrix<T>&& rval); //<-- Move assignment operator
 
 	//Arithmetic
-	T determinant();
-	Matrix<T> inverse();
 	Matrix<T> transpose();
 
 	//T arithmetic
@@ -78,15 +78,9 @@ public:
 	//Insertion
 	inline void set_element(const int x, const int y, const T& elem){ mat[x][y] = elem; };
 
-	//TODO: Remove guards
-
 	//Access
 	inline T& get_element(const int x, const int y){ return mat[x][y]; };
-	inline T* operator[](const int location) const{ 
-		if (location < 0 || location >= x)
-			return mat[0];
-		return mat[location]; 
-	};
+	inline T* operator[](const int location) const{ return mat[location]; };
 
 	//Size operations
 	inline int get_x_dim() const{ return x; };
@@ -95,14 +89,9 @@ public:
 	inline int get_height() const{ return x; };
 	inline int get_width() const { return y; };
 
-	//Display //TODO: Move into implementation file
-	friend std::ostream& operator<<(std::ostream& os, const Matrix<T>& m){
-		for (int i=0; i<m.x; ++i){
-			for (int j=0; j<m.y; ++j) os << std::right << std::setw(3) <<  m[i][j];
-			os << std::endl;
-		}
-		return os;
-	};
+	//Display
+	template<typename E>
+	friend std::ostream& operator<<(std::ostream& os, const Matrix<E>& m);
 
 private:
 	int x;

@@ -10,10 +10,7 @@
 #include "PagodaTester.h"
 #include "PerformanceCounter.h"
 
-//TODO: GO THROUGH AREAS OF MY PROGRAM AND LOOK FOR PLACES IM PROUD OF
-//TODO: Change matrix to be the same as new matrix
 //TODO: Evaluate performance of type 3
-//TODO: Get help to fix type 2
 
 int main(){
 
@@ -32,12 +29,39 @@ int main(){
 		/*pt.Threadedtest(10000000, 100);*/
 		/*pt.Threadedtest("pagodaResults.txt", 100, "verifyResults.txt");*/
 		/*pt.ThreadedtestType3(1000000, "verifyResults.txt");*/
-		pt.ThreadedtestType2(10000000, 100);
+		pt.ThreadedtestType2(100000, 100, "Crazy test results.txt");
 		/*pt.verifyFile("pagodaResults.txt");*/
 		std::cout << "Time taken: " << GetCounter() << std::endl;
 		//std::cout << "Sequential test. " << std::endl;
 
-		/*pt.~PagodaTester();*/
+		//Matrix<int> m;
+		//Matrix<int> n(3,4);
+		//
+		//m[0][0] = 0;
+		//m[0][1] = 1;
+		//m[0][2] = 2;
+		//m[1][0] = 6;
+		//m[1][1] = 4;
+		//m[1][2] = 3;
+		//m[2][0] = 6;
+		//m[2][1] = 7;
+		//m[2][2] = 8;
+
+		///*for (int i=0; i<m.get_x_dim(); ++i)
+		//	for (int j=0; j<m.get_y_dim(); ++j)
+		//		m[i][j] = i+j;*/
+
+		//for (int i=0; i<n.get_x_dim(); ++i)
+		//	for (int j=0; j<n.get_y_dim(); ++j)
+		//		n[i][j] = 7;
+
+
+		//std::cout << n << std::endl;
+		//std::cout << n.transpose() << std::endl;
+
+		//
+		//std::cout << m * n << std::endl;
+		///*pt.~PagodaTester();*/
 
 		system("pause");
 

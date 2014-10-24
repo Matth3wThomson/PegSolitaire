@@ -263,26 +263,8 @@ void Pagoda::print_vector_as_board(std::ostream& os, const Vector<E>& v){
 //TODO: ACCESS YALE MATRIX MORE EFFICIENTLY
 bool Pagoda::generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState){
 
-	//TODO: Make this method pass by pointer, allowing NULLS. Then use the following code to
-	// verify state.
-
-	//We want to store all of our pagodas in the pagoda class, and have references to ones that work
-	//for a pagoda combination stored as a pointer to the pagodas array of pagoda functions function that
-	//works for that combination.
-
-	/*if (pagoda){
-	if (verify_pagoda(*pagoda)) return true;
-	else delete pagoda;
-	}
-
-	pagodaFunctions.push_back(new Vector<int>(endState));
-	pagoda = pagodaFunctions.back();
-	*/
-
-
 	pagoda = Vector<int>(endState);
 
-	/*Vector<int> pagoda(endStateVec);*/
 	Vector<bool> fixedVector(pagoda.size()); //True if fixed, false if not. TODO: Native array?
 
 	//Brute force?

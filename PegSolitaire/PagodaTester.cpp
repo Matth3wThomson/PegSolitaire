@@ -92,7 +92,7 @@ void PagodaTester::verifyFile(const std::string& inputFilename, const std::strin
 
 	//If you want to write to file it checks that it is there before commencing tests
 	if (writeToFile){
-		std::fstream file = std::fstream();
+		std::ofstream file = std::ofstream();
 		file.open(outputFilename);
 
 		if (!file.is_open()) throw std::invalid_argument("Output file could not be found or created!");
@@ -129,7 +129,7 @@ void PagodaTester::verifyFile(const std::string& inputFilename, const std::strin
 
 	if (writeToFile){
 		std::cout << "Attempting to write to file: " << outputFilename << std::endl;
-		for (int i=0; i<results.size(); ++i){
+		for (unsigned int i=0; i<results.size(); ++i){
 			if (!p.print_to_file(outputFilename, results[i], i)) throw std::invalid_argument("Output file could not be found or created after tests!");
 		}
 	}
@@ -148,7 +148,7 @@ void PagodaTester::sequentialTest(const std::string& inputFilename, const std::s
 
 	//If you want to write to file it checks that it is there before commencing tests
 	if (writeToFile){
-		std::fstream file = std::fstream();
+		std::ofstream file = std::ofstream();
 		file.open(outputFilename);
 
 		if (!file.is_open()) throw std::invalid_argument("Output file not found!");
@@ -185,7 +185,7 @@ void PagodaTester::sequentialTest(const std::string& inputFilename, const std::s
 
 	if (writeToFile){
 		std::cout << "Attempting to write to file: " << outputFilename << std::endl;
-		for (int i=0; i<results.size(); ++i){
+		for (unsigned int i=0; i<results.size(); ++i){
 			if (!p.print_to_file(outputFilename, results[i], i)) throw std::invalid_argument("Output file could not be found or created after tests");
 		}
 	}
@@ -201,7 +201,7 @@ void PagodaTester::Threadedtest(int numberOfTests, int batchSize, const std::str
 
 	//If you want to write to file it checks that it is there before commencing tests
 	if (writeToFile){
-		std::fstream file = std::fstream();
+		std::ofstream file = std::ofstream();
 		file.open(outputFile);
 
 		if (!file.is_open()) throw std::invalid_argument("Output file not found!");
@@ -257,7 +257,7 @@ void PagodaTester::Threadedtest(int numberOfTests, int batchSize, const std::str
 
 		if (writeToFile){
 			std::cout << "Attempting to write to file: " << outputFile << std::endl;
-			for (int i=0; i<results.size(); ++i){
+			for (unsigned int i=0; i<results.size(); ++i){
 				if (!p.print_to_file(outputFile, results[i], i)) throw std::invalid_argument("Output file could not be found or created after tests");
 			}
 		}
@@ -280,7 +280,7 @@ void PagodaTester::Threadedtest(const std::string& inputFilename, int batchSize,
 
 	//If you want to write to file it checks that it is there before commencing tests
 	if (writeToFile){
-		std::fstream file = std::fstream();
+		std::ofstream file = std::ofstream();
 		file.open(outputFilename);
 
 		if (!file.is_open()) throw std::invalid_argument("Output file not found!");
@@ -311,7 +311,7 @@ void PagodaTester::Threadedtest(const std::string& inputFilename, int batchSize,
 
 	if (writeToFile){
 		std::cout << "Attempting to write to file: " << outputFilename << std::endl;
-		for (int i=0; i<results.size(); ++i){
+		for (unsigned int i=0; i<results.size(); ++i){
 			if (!p.print_to_file(outputFilename, results[i], i)) throw std::invalid_argument("Output file could not be found or created after tests");
 		}
 	}
@@ -325,15 +325,16 @@ void PagodaTester::ThreadedtestType2(int numberOfTests, int batchSize, const std
 	else {
 
 		resetTester();
+		this->testsCreated = numberOfTests;
+		this->testsCompleted = numberOfTests;
 
-		//TODO: Make this try to open the file first
 		bool recordResults = outputFile != "";
 
 		//Check if the file is actually valid
 		if (recordResults){
-			std::ifstream file = std::ifstream();
+			std::ofstream file = std::ofstream();
 			file.open(outputFile);
-			if (!file.is_open()) throw std::invalid_argument("Output file entered was not found");
+			if (!file.is_open()) throw std::invalid_argument("Output file entered was not found or able to be created");
 		}
 
 		////Start all threads
@@ -352,7 +353,7 @@ void PagodaTester::ThreadedtestType2(int numberOfTests, int batchSize, const std
 		}
 
 		jobMutex.lock();
-		jobs.push( [this, batchSize, recordResults] { this->produceAndConsume(batchSize, recordResults);});
+		jobs.push( [this, numberOfTests, recordResults] { this->produceAndConsume(numberOfTests, recordResults);});
 		jobMutex.unlock();
 
 		std::cout << "Pushed all jobs onto job list" << std::endl;
@@ -369,7 +370,7 @@ void PagodaTester::ThreadedtestType2(int numberOfTests, int batchSize, const std
 		//Stop threads when finished.
 		consumerQuit = true;
 
-		for (int i=0; i<threadArray.size(); ++i)
+		for (unsigned int i=0; i<threadArray.size(); ++i)
 			if (threadArray[i].joinable()) threadArray[i].join();
 
 		while (!threadArray.empty()){
@@ -377,13 +378,16 @@ void PagodaTester::ThreadedtestType2(int numberOfTests, int batchSize, const std
 		}
 
 		/*std::this_thread::sleep_for(std::chrono::milliseconds(1000));*/
+		std::cout << "Threads destroyed. " << std::endl;
+		std::cout << *this << std::endl;
 
 		//Print the results to file
-		for (int i=0; i<results.size(); ++i){
-			p.print_to_file(outputFile, results[i], i);
+		if (recordResults){
+			std::cout << "Writing to file " << outputFile << std::endl;
+			for (unsigned int i=0; i<results.size(); ++i){
+				if (!p.print_to_file(outputFile, results[i], i)) throw std::invalid_argument("Output file not found at end of test. ");
+			}
 		}
-
-		std::cout << *this << std::endl;
 	}
 
 }
@@ -419,7 +423,7 @@ void PagodaTester::ThreadedtestType3(int numberOfTests, const std::string& outpu
 	if (writeToFile){
 		std::cout << "Attempting to write to file: " << outputFile << std::endl;
 
-		for (int i=0; i<results.size(); ++i){
+		for (unsigned int i=0; i<results.size(); ++i){
 			if (!p.print_to_file(outputFile, results[i], i)) throw std::invalid_argument("Writing to file failed");
 		}
 	}
@@ -427,7 +431,7 @@ void PagodaTester::ThreadedtestType3(int numberOfTests, const std::string& outpu
 
 
 
-//TODO: if you find a result, print to file if requested
+//TODO: Possible improvement by storing results locally until end of batch?
 void PagodaTester::consumer(int batchSize, bool recordResults){
 
 	std::vector<Pagoda::BoardPair> internalTests = std::vector<Pagoda::BoardPair>();
@@ -439,7 +443,7 @@ void PagodaTester::consumer(int batchSize, bool recordResults){
 
 			//Collect all jobs possible until you reach your batch size
 			//or there are no jobs left...
-			while (!tests.empty() && internalTests.size()<batchSize){
+			while (!tests.empty() && internalTests.size()< (unsigned int) batchSize){
 				internalTests.push_back(tests.back());
 				tests.pop_back();
 			}
@@ -523,7 +527,7 @@ void PagodaTester::producer(int batchSize, int totalTests){
 			tCreateMut.unlock();
 
 			//While you have a tests to create in this batch, keep creating them
-			while (internalTests.size() < thisBatch){
+			while (internalTests.size() < (unsigned int) thisBatch){
 				internalTests.push_back(p.create_random_board_pair(rand()));
 			}
 

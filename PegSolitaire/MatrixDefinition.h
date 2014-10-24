@@ -77,28 +77,6 @@ Matrix<T>& Matrix<T>::operator=(Matrix<T>&& rval){
 }
 
 
-//TODO: Untested
-template<typename T>
-T Matrix<T>::determinant(){
-	if (x != y) throw std::invalid_argument("Determinant requires square matrix");
-	T pos;
-	T neg;
-
-	for (int i=0; i<x; ++i){
-		pos *= mat[i][i];
-		neg *= mat[i][x-(i+1)];
-	}
-
-	return pos - neg;
-}
-
-//TODO: Implement
-template<typename T>
-Matrix<T> Matrix<T>::inverse(){
-	T determinant = determinant();
-}
-
-//TODO: Untested
 template<typename T>
 Matrix<T> Matrix<T>::transpose(){
 	Matrix<T> trans(y, x);
@@ -127,20 +105,19 @@ Matrix<E> operator*(const E& lhs, const Matrix<E>& rhs){
 	return rhs * lhs;
 }
 
-
 //MATRIX ARITHMETIC
 
 template<typename E>
 Matrix<E> operator*(const Matrix<E>& lhs, const Matrix<E>& rhs){
+
+	if (lhs.get_y_dim() != rhs.get_x_dim()) throw std::invalid_argument("MatrixMatrix multiply requires number of rows equal to columns");
+
 	Matrix<E> result(lhs.x, rhs.y);
 
-	for (int i=0; i<lhs.x; ++i){
-		for (int j=0; j<lhs.x; ++j){
-			for (int k = 0; k < lhs.x; ++k){
-				result[i][j] += lhs[k][j] * rhs[i][k];
-			}
-		}
-	}
+	for (int i=0; i< lhs.x; ++i)
+		for (int j=0; j < rhs.y; ++j)
+			for (int k=0; k<lhs.y; ++k)
+				result.mat[i][j] += lhs.mat[i][k] * rhs.mat[k][j];
 
 	return result;
 }
@@ -198,4 +175,14 @@ Vector<E> Matrix<E>::operator*(const Vector<E>& rhs){
 			temp[i] += (*this)[i][j] * rhs[j];
 
 	return temp;
+}
+
+//DISPLAY
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const Matrix<T>& m){
+	for (int i=0; i<m.x; ++i){
+			for (int j=0; j<m.y; ++j) os << std::right << std::setw(4) <<  m[i][j];
+			os << std::endl;
+		}
+	return os;
 }
