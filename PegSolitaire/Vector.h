@@ -60,6 +60,9 @@ public:
 	template<typename E>
 	friend E operator*(const Vector<E>& lhs, const Vector<E>& rhs);
 
+	template<typename E, typename F>
+	friend E operator*(const Vector<E>& lhs, const Vector<F>& rhs);
+
 	template<typename E>
 	friend Vector<E> operator+(const Vector<E>& lhs, const Vector<E>& rhs);
 	Vector<T>& operator+=(const Vector<T>& rhs);

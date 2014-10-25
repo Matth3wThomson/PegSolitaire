@@ -127,6 +127,18 @@ E operator*(const Vector<E>& lhs, const Vector<E>& rhs){
 	return value;
 };
 
+template<typename E, typename F>
+E operator*(const Vector<E>& lhs, const Vector<F>& rhs){
+	if (lhs.container_size != rhs.container_size) throw std::invalid_argument("Dot product requires vectors of equal size");
+
+	E value = E();
+
+	for (int i=0; i<rhs.container_size; ++i)
+		value += lhs[i] * rhs[i];
+
+	return value;
+}
+
 template<typename E>
 Vector<E> operator+(const Vector<E>& lhs, const Vector<E>& rhs){
 	if (lhs.container_size != rhs.container_size) throw 

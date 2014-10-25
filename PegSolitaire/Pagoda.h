@@ -15,6 +15,9 @@
 		 the use of a mutex
 		-Implicit move constructors do not work with the VS2012 compiler, so have been written
 		 for BoardPair
+		-A work around has been used for the lack of sharable mutex support in ++11. set of known 
+		 pagoda functions is only locked when generation is possible. This is dangerous if not used
+		 appropriately.
 */
 
 class Pagoda
@@ -100,12 +103,16 @@ public:
 	int get_no_peg_holes() const { return pegHoles; };
 	int get_no_unique_pag() const { return pagodaFunctions.size(); };
 
+	void setGenerationMode(bool a){ possibleGeneration = a; }
+
 private:
 	Matrix<bool> board;
 
 	Matrix<int> indexMat;
 	YaleMatrix<int> jumpMat;
 	int pegHoles;
+
+	bool possibleGeneration;
 
 	//THIS ONLY STORES VALID PAGODA FUNCTIONS
 	std::set<Vector<int>> pagodaFunctions;

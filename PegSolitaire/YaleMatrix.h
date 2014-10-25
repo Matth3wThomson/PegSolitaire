@@ -20,8 +20,9 @@ public:
 
 	template<typename E>
 	friend Vector<E> operator*(const YaleMatrix<E>& lhs, const Vector<E>& rhs);
-	//TODO: Do this function!
-	/*friend Vector<T> operator*(const Vector<T>& lhs, const YaleMatrix<T>& rhs);*/
+
+	template<typename E, typename F>
+	friend Vector<F> operator*(const YaleMatrix<E>& lhs, const Vector<F>& rhs);
 
 	T at(int x, int y);
 

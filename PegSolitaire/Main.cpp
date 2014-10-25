@@ -8,7 +8,6 @@
 #include "Pagoda.h"
 #include <iostream>
 #include "PagodaTester.h"
-#include "PerformanceCounter.h"
 
 //TODO: Move performance counter into tester!
 //TODO: Evaluate performance of type 3
@@ -21,18 +20,55 @@ int main(){
 	{
 
 		std::cout << "Program start. " << std::endl;
-		PagodaTester pt(8);
 
-		/*std::cout << "Threaded test. " << std::endl;*/
-		StartCounter();
-		/*pt.sequentialTest(100000, true, true, "pagodaResults.txt");*/
-		/*pt.sequentialTest("pagodaResults.txt", true, true, "pagodaResults.txt");*/
-		pt.Threadedtest(1000000, 100, true, true);
-		/*pt.Threadedtest("pagodaResults.txt", 100, "verifyResults.txt");*/
-		/*pt.ThreadedtestType3(1000000, "verifyResults.txt");*/
-		/*pt.ThreadedtestType2(100000, 100, "Crazy test results.txt");*/
+		/*std::vector<Pagoda::BoardPair> boards;
+		Pagoda p(true);
+		p.load_from_file("testDoubles.txt", boards);*/
+
+
+		Matrix<int> mat(3, 3);
+		for (int i=0; i<mat.get_x_dim(); ++i)
+			for (int j=0; j<mat.get_y_dim(); ++j)
+				mat[i][j] = rand() % 3;
+
+		YaleMatrix<int> a(mat);
+
+
+		Vector<int> b(3);
+
+		b[0] = 1;
+		b[1] = 1;
+		b[2] = 1;
+		/*b[3] = 1;
+		b[4] = 1;*/
+
+		Vector<double> d(3);
+
+		d[0] = 0.4;
+		d[1] = 3.8;
+		d[2] = 6.7;
+		/*d[3] = 8.8;
+		d[4] = 0.3;*/
+
+		/*std::cout << b * d << std::endl;*/
+		/*std::cout << d * b << std::endl;*/
+
+		std::cout << a * d << std::endl;
+
+		//PagodaTester pt(8);
+		//pt.setLoad(true);
+		//pt.setSave(true);
+		//pt.setAccum(true);
+		//pt.setGenerateNewPags(true);
+
+		///*std::cout << "Threaded test. " << std::endl;*/
+		///*pt.sequentialTest(100000);*/
+		///*pt.sequentialTest("pagodaResults.txt", "pagodaResults.txt");*/
+		///*pt.Threadedtest(1000000, 100, "pagodaResults.txt");*/
+		///*pt.Threadedtest("pagodaResults.txt", 100);*/
+		///*pt.ThreadedtestType3(1000000, "verifyResults.txt");*/
+		//pt.ThreadedtestType2(10000000, 100);
 		/*pt.verifyFile("pagodaResults.txt", "Crazy tests results.txt");*/
-		std::cout << "Time taken: " << GetCounter() << std::endl;
 		//std::cout << "Sequential test. " << std::endl;
 
 		//Matrix<int> m;

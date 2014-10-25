@@ -31,31 +31,40 @@ public:
 	~PagodaTester(void);
 
 	//Performs tests sequentially on randomly generated boards
-	void sequentialTest(int numberOfTests, const bool loadPagodas = false, const bool savePagodas = false, const std::string& outputFile = "");
+	void sequentialTest(int numberOfTests, const std::string& outputFile = "");
 
 	//Performs tests sequentially on boards read from a file
-	void sequentialTest(const std::string& inputFilename, const bool loadPagodas = false, const bool savePagodas = false, const std::string& outputFilename = "");
+	void sequentialTest(const std::string& inputFilename, const std::string& outputFilename = "");
 
 	//Reads boards from a file and outputs to another file boards that are not verified pagodas
 	void verifyFile(const std::string& inputFilename, const std::string& outputFilename = "");
 
 	//Randomly generates boards and tests them on all cores
-	void Threadedtest(int numberOfTests, int batchSize = 100, const bool loadPagodas = false, const bool savePagodas = false, const std::string& outputFile = "");
+	void Threadedtest(int numberOfTests, int batchSize = 100, const std::string& outputFile = "");
 
 	//Performs tests across all cores from boards read from file
-	void Threadedtest(const std::string& inputFilename, int batchSize, const bool loadPagodas = false, const bool savePagodas = false, const std::string& outputFilename = "");
+	void Threadedtest(const std::string& inputFilename, int batchSize, const std::string& outputFilename = "");
 
 	//Randomly generates boards and tests them on all cores using a different threading system
-	void ThreadedtestType2(int numberOfTests, int batchSize = 100, const bool loadPagodas = false, const bool savePagodas = false, const std::string& outputFile = "");
-
-	void ThreadedtestType3(int numberOfTests, const bool loadPagodas = false, const bool savePagodas = false, const std::string& outputFile = "");
+	void ThreadedtestType2(int numberOfTests, int batchSize = 100, const std::string& outputFile = "");
 
 	friend std::ostream& operator<<(std::ostream& os, const PagodaTester& p);
+
+	void setLoad(bool a){ loadPagodas = a; };
+	void setSave(bool a){ savePagodas = a; };
+	void setAccum(bool a){ accumPagodas = a; };
+	void setGenerateNewPags(bool a){ 
+		generateNewPags = a;
+		p.setGenerationMode(a);
+	};
+
 private:
 
-	void resetTester(const bool loadPagodas = false);
+	void resetTester();
 	void checkOFileExists(const std::string& filename);
 	bool writeResultsToFile(const std::string& filename);
+
+	bool loadPagodas, savePagodas, accumPagodas, generateNewPags;
 
 	//C++ limitation... Definition in CPP
 	static const std::string pagodaStorage;
@@ -92,7 +101,7 @@ private:
 	
 
 	//THREADING VERSION TWO
-	void consumer(int batchSize,  bool pastResults = false, bool recordResults = false);
+	void consumer(int batchSize, bool recordResults = false);
 	void producer(int batchSize, int totalTests);
 
 	//Another version of multithreading

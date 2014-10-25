@@ -48,8 +48,6 @@ Pagoda::~Pagoda(void)
 {
 }
 
-
-
 //TODO: Flexibility?
 void Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>& bps){
 	std::ifstream file = std::ifstream();
@@ -100,8 +98,6 @@ void Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>&
 			file >> temp;
 		}
 
-
-
 		if (temp == "END:"){
 			load_vector_from_board(file, bps.back().endState);
 
@@ -141,6 +137,8 @@ void Pagoda::load_vector_from_board(std::istream& is, Vector<E>& v){
 
 bool Pagoda::save_pagoda_functions(const std::string& filename){
 
+	std::cout << "Saving pagodas found to: '" << filename << "'." << std::endl;
+
 	std::ofstream file;
 
 	file.open(filename);
@@ -158,6 +156,7 @@ bool Pagoda::save_pagoda_functions(const std::string& filename){
 
 bool Pagoda::load_pagoda_functions(const std::string& filename){
 
+	std::cout << "Loading pagodas from: '" << filename << "'." << std::endl;
 	std::ifstream file;
 
 	file.open(filename);
@@ -250,78 +249,8 @@ void Pagoda::print_vector_as_board(std::ostream& os, const Vector<E>& v){
 }
 
 //TODO: ACCESS YALE MATRIX MORE EFFICIENTLY
-//bool Pagoda::generate_pagoda(Vector<int>& pagoda){
-//
-//	pagoda = Vector<int>(endStateVec);
-//
-//	/*Vector<int> pagoda(endStateVec);*/
-//	Vector<bool> fixedVector(pagoda.size()); //True if fixed, false if not. TODO: Native array?
-//
-//	//Brute force?
-//
-//	
-//	//For each row of the jump matrix
-//	for (int i=0; i<jumpMat.get_x_dim(); ++i){
-//
-//		int jumpIndices[3];
-//		int index = 0;
-//
-//		//Find the indices of stateVector which are part of this row's jump
-//		for (int j=0; j<jumpMat.get_y_dim(); ++j){
-//			if (jumpMat.at(i,j)) //If this is an index
-//				if (jumpMat.at(i,j) == -1)	//If this is the landing spot (Z)
-//					jumpIndices[2] = j;
-//				else jumpIndices[index++] = j; //Else this is jumped from or over (X or Y)
-//		}
-//
-//		//Jump indices now contains all of the indices into a stateVector where there is a jump present
-//		if (pagoda[jumpIndices[0]] + pagoda[jumpIndices[1]] < pagoda[jumpIndices[2]]){
-//			//We have found a jump which does not solve the inequality
-//			//X + Y >= Z
-//
-//			//Lambda solveInequality for modifying a property until the inequality is solved
-//			auto solveInequality = [&] (int indexToMod, bool grow){
-//
-//				while (pagoda[jumpIndices[0]] + pagoda[jumpIndices[1]] < pagoda[jumpIndices[2]]){
-//					if (grow) pagoda[jumpIndices[indexToMod]]++;
-//					else pagoda[jumpIndices[indexToMod]]--;
-//				}
-//
-//				//Let the fixed vector know that you have fixed a value
-//				fixedVector[jumpIndices[indexToMod]] = true;
-//			};
-//			
-//
-//			if (!fixedVector[jumpIndices[2]]){ //Z value not fixed yet
-//				solveInequality(2, false); //Fix Z
-//			}	else if (!fixedVector[jumpIndices[1]]){ //Y value not fixed yet
-//				solveInequality(1, true); //Fix Y
-//			}	else if (!fixedVector[jumpIndices[0]]){ //X value not fixed yet
-//				solveInequality(0, true); //Fix X
-//			} else {
-//				//Not possible to create a pagoda for this board
-//				/*std::cout << "Pag: " << pagoda << std::endl;
-//				std::cout << "End: " << endStateVec << std::endl;
-//				std::cout << "Fix: " << fixedVector << std::endl << std::endl;*/
-//
-//				return false;
-//			}
-//		}
-//	}
-//
-//	/*std::cout << "fixed vector: " << fixedVector << std::endl;*/
-//
-//	/*std::cout << "Pag: " << pagoda << std::endl;
-//	std::cout << "End: " << endStateVec << std::endl;
-//	std::cout << "Fix: " << fixedVector << std::endl << std::endl;*/
-//	/*return true;*/
-//	if (verify_pagoda(pagoda))
-//		return true;
-//	else return false;
-//}
-
-//TODO: ACCESS YALE MATRIX MORE EFFICIENTLY
 bool Pagoda::generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState, bool saveResults){
+	if (possibleGeneration){
 
 	pagoda = Vector<int>(endState);
 
@@ -368,13 +297,6 @@ bool Pagoda::generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState, b
 			}	else if (!fixedVector[jumpIndices[0]]){ //X value not fixed yet
 				solveInequality(0, true); //Fix X
 			} else {
-				//Not possible to create a pagoda for this board
-				/*std::cout << "Pag: " << pagoda << std::endl;
-				std::cout << "End: " << endStateVec << std::endl;
-				std::cout << "Fix: " << fixedVector << std::endl << std::endl;*/
-
-
-				//TODO: Should this set the pagoda to null before trying to return?
 				return false;
 			}
 		}
@@ -383,8 +305,9 @@ bool Pagoda::generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState, b
 	if (verify_pagoda(pagoda, saveResults))
 		return true;
 	else return false;
-}
 
+	}
+}
 
 bool Pagoda::verify_pagoda(const Vector<int>& pagoda, const bool saveResults){
 	//NO NEED TO TRANSPOSE! (Jump matrix is already in jump*location format)
@@ -403,7 +326,6 @@ bool Pagoda::verify_pagoda(const Vector<int>& pagoda, const bool saveResults){
 void Pagoda::savePagoda(const Vector<int>& pagoda){
 	pagodaFuncsMut.lock();
 	pagodaFunctions.insert(pagoda);
-	/*if (pagodaFunctions.find(pagoda) != pagodaFunctions.end()) std::cout << pagoda << std::endl;*/
 	pagodaFuncsMut.unlock();
 }
 
@@ -418,17 +340,16 @@ bool Pagoda::prove_insolv_with_saved(BoardPair& bp){
 		if (preCalc * bp.pagoda < 0)
 			return true;
 
-	//TODO: recognise possible threading issue here
-	pagodaFuncsMut.lock();
+	if (possibleGeneration) pagodaFuncsMut.lock();
 	for (auto itr = pagodaFunctions.begin(); itr != pagodaFunctions.end(); itr++)
 		if (preCalc * *itr < 0){
 			bp.pagoda = *itr;
 			bp.hasPagoda = true;
-			pagodaFuncsMut.unlock();
+			if (possibleGeneration) pagodaFuncsMut.unlock();
 			return true;
 		}
 
-	pagodaFuncsMut.unlock();
+	if (possibleGeneration) pagodaFuncsMut.unlock();
 	return false;
 
 }

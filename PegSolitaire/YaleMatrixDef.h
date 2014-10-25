@@ -171,7 +171,20 @@ Vector<E> operator*(const YaleMatrix<E>& lhs, const Vector<E>& rhs){
 	return temp;
 }
 
-template<typename T>
-Vector<T> operator*(const Vector<T>& lhs, const YaleMatrix<T>& rhs){
-	return rhs*lhs;
+template<typename E, typename F>
+Vector<F> operator*(const YaleMatrix<E>& lhs, const Vector<F>& rhs){
+	if (lhs.y != rhs.size()) throw 
+		std::invalid_argument("Matrix/Vector multiplication requires same number of matrix columns to vector size");
+
+	Vector<F> temp(lhs.get_x_dim());
+
+	//For each possible row
+	for (int i=0; i<lhs.x-1; ++i)
+		//Loop through the elements on that row
+		for (int j = lhs.IA[i]; j < lhs.IA[i+1]; ++j)
+			//Adding the multiplication of the elements on that row with the 
+			//vector at the location of the column of the element to be multiplied
+			temp[i] +=  rhs[lhs.JA[j]] * lhs.A[j];
+		
+	return temp;
 }
