@@ -10,6 +10,7 @@
 #include "PagodaTester.h"
 #include "PerformanceCounter.h"
 
+//TODO: Move performance counter into tester!
 //TODO: Evaluate performance of type 3
 
 int main(){
@@ -22,15 +23,15 @@ int main(){
 		std::cout << "Program start. " << std::endl;
 		PagodaTester pt(8);
 
-		std::cout << "Threaded test. " << std::endl;
+		/*std::cout << "Threaded test. " << std::endl;*/
 		StartCounter();
-		/*pt.sequentialTest(1000, "pagodaResults.txt");*/
-		/*pt.sequentialTest("pagodaResults.txt", "pagodaResults.txt");*/
-		/*pt.Threadedtest(10000000, 100);*/
+		/*pt.sequentialTest(100000, true, true, "pagodaResults.txt");*/
+		/*pt.sequentialTest("pagodaResults.txt", true, true, "pagodaResults.txt");*/
+		pt.Threadedtest(1000000, 100, true, true);
 		/*pt.Threadedtest("pagodaResults.txt", 100, "verifyResults.txt");*/
 		/*pt.ThreadedtestType3(1000000, "verifyResults.txt");*/
-		pt.ThreadedtestType2(100000, 100, "Crazy test results.txt");
-		/*pt.verifyFile("pagodaResults.txt");*/
+		/*pt.ThreadedtestType2(100000, 100, "Crazy test results.txt");*/
+		/*pt.verifyFile("pagodaResults.txt", "Crazy tests results.txt");*/
 		std::cout << "Time taken: " << GetCounter() << std::endl;
 		//std::cout << "Sequential test. " << std::endl;
 

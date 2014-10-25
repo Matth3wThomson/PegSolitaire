@@ -36,6 +36,17 @@ public:
 	template<typename E>
 	Vector(const Vector<E>& rhs);
 
+	//TODO: More boolean operators if time/necesary?
+	//Boolean operators
+	template<typename E>
+	friend bool operator==(const Vector<E>& lhs, const Vector<E>& rhs);
+
+	template<typename E>
+	friend bool operator!=(const Vector<E>& lhs, const Vector<E>& rhs);
+
+	template<typename E>
+	friend bool operator<(const Vector<E>& lhs, const Vector<E>& rhs);
+
 	//Arithmetic
 	T magnitude();
 
@@ -80,12 +91,12 @@ public:
 	//Size of Vector
 	inline int size() const{ return container_size; };
 
-	//Display
-	friend std::ostream& operator<<(std::ostream& os, Vector<T>& v){
+	//Display TODO: move this out of here
+	friend std::ostream& operator<<(std::ostream& os, const Vector<T>& v){
 		for (int i=0; i<v.size(); ++i)
 			os << v[i] << ",";
 		return os;
-	};
+	}
 
 private:
 	int container_size;

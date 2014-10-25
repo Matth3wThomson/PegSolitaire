@@ -22,17 +22,40 @@ Pagoda::Pagoda(const Matrix<bool>& boardShape)
 	jumpMat = Solitaire::CreateJumpMat(board, indexMat, pegHoles);
 }
 
+Pagoda::Pagoda(const Pagoda& rhs){
+	board = rhs.board;
+	indexMat = rhs.indexMat;
+	jumpMat = rhs.jumpMat;
+
+	pagodaFunctions = rhs.pagodaFunctions;
+	pegHoles = rhs.pegHoles;
+}
+
+Pagoda& Pagoda::operator=(const Pagoda& rhs){
+	if (this == &rhs) return *this;
+
+	board = rhs.board;
+	indexMat = rhs.indexMat;
+	jumpMat = rhs.jumpMat;
+
+	pagodaFunctions = rhs.pagodaFunctions;
+	pegHoles = rhs.pegHoles;
+
+	return *this;
+}
 
 Pagoda::~Pagoda(void)
 {
 }
 
+
+
 //TODO: Flexibility?
-bool Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>& bps){
+void Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>& bps){
 	std::ifstream file = std::ifstream();
 
 	file.open(filename.c_str());
-	if (!file.is_open()) return false;
+	if (!file.is_open()) return throw std::invalid_argument("File not found");
 
 	std::string temp;
 	file >> temp;
@@ -49,7 +72,7 @@ bool Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>&
 
 			if (temp == "HEIGHT"){
 				file >> height;
-			} else return false; //The format is incorrect!
+			} else throw std::invalid_argument("File format incorrect"); //The format is incorrect!
 
 			board = Matrix<bool>(height, width);
 			file >> temp;
@@ -59,7 +82,7 @@ bool Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>&
 					file >> temp;
 					if (temp == "T") board[i][j] = true;
 					else if (temp == "F") board[i][j] = false;
-					else return false; //The format is incorrect
+					else throw std::invalid_argument("File format incorrect"); //The format is incorrect
 				}
 			}
 
@@ -95,7 +118,7 @@ bool Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>&
 
 	}
 
-	return true;
+	file.close();
 }
 
 //TODO: These functions dont request that vectors be of the correct length
@@ -114,6 +137,43 @@ void Pagoda::load_vector_from_board(std::istream& is, Vector<E>& v){
 		}
 	}
 
+}
+
+bool Pagoda::save_pagoda_functions(const std::string& filename){
+
+	std::ofstream file;
+
+	file.open(filename);
+
+	if (!file.is_open()) return false;
+
+	for (auto itr = pagodaFunctions.begin(); itr != pagodaFunctions.end(); itr++){
+		print_vector_as_board(file, *itr);
+		file << std::endl;
+	}
+
+	file.close();
+	return true;
+}
+
+bool Pagoda::load_pagoda_functions(const std::string& filename){
+
+	std::ifstream file;
+
+	file.open(filename);
+
+	if (!file.is_open()) return false;
+
+	while (!file.eof()){
+		Vector<int> temp(pegHoles);
+		load_vector_from_board(file, temp);
+
+		pagodaFunctions.insert(temp);
+	}
+
+	file.close();
+
+	return true;
 }
 
 bool Pagoda::print_to_file(const std::string& filename, const BoardPair& bp, bool append){
@@ -261,7 +321,7 @@ void Pagoda::print_vector_as_board(std::ostream& os, const Vector<E>& v){
 //}
 
 //TODO: ACCESS YALE MATRIX MORE EFFICIENTLY
-bool Pagoda::generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState){
+bool Pagoda::generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState, bool saveResults){
 
 	pagoda = Vector<int>(endState);
 
@@ -320,46 +380,55 @@ bool Pagoda::generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState){
 		}
 	}
 
-	/*std::cout << "fixed vector: " << fixedVector << std::endl;*/
-
-	/*std::cout << "Pag: " << pagoda << std::endl;
-	std::cout << "End: " << endStateVec << std::endl;
-	std::cout << "Fix: " << fixedVector << std::endl << std::endl;*/
-	/*return true;*/
-	if (verify_pagoda(pagoda))
+	if (verify_pagoda(pagoda, saveResults))
 		return true;
 	else return false;
 }
 
 
-bool Pagoda::verify_pagoda(const Vector<int>& pagoda){
+bool Pagoda::verify_pagoda(const Vector<int>& pagoda, const bool saveResults){
 	//NO NEED TO TRANSPOSE! (Jump matrix is already in jump*location format)
 	Vector<int> x = (jumpMat * pagoda);
 
 	for (int i=0; i<x.size(); ++i)
 		if (x[i] < 0) return false;
 
+	if (saveResults){
+		savePagoda(pagoda);
+	}
+
 	return true;
 };
 
-////TODO: Test this!
-//bool Pagoda::prove_insolvable(const Vector<int>& pagoda){
-//	//If (s-e).p is negative, then this problem is insolvable
-//	return ((startStateVec - endStateVec)*pagoda < 0);
-//};
+void Pagoda::savePagoda(const Vector<int>& pagoda){
+	pagodaFuncsMut.lock();
+	pagodaFunctions.insert(pagoda);
+	/*if (pagodaFunctions.find(pagoda) != pagodaFunctions.end()) std::cout << pagoda << std::endl;*/
+	pagodaFuncsMut.unlock();
+}
 
 bool Pagoda::prove_insolvable(const BoardPair& bp){
 	return ((bp.startState - bp.endState)* bp.pagoda< 0);
 }
 
-bool Pagoda::prove_insolv_with_saved(const BoardPair& bp){
-	if (prove_insolvable(bp)) return true;
+bool Pagoda::prove_insolv_with_saved(BoardPair& bp){
+	Vector<int> preCalc = bp.startState - bp.endState;
+
+	if (bp.hasPagoda)
+		if (preCalc * bp.pagoda < 0)
+			return true;
 
 	//TODO: recognise possible threading issue here
-	for (unsigned int i=0; i<this->pagodaFunctions.size(); ++i){
-		if ((bp.startState - bp.endState) * pagodaFunctions[i] < 0) return true;
-	}
+	pagodaFuncsMut.lock();
+	for (auto itr = pagodaFunctions.begin(); itr != pagodaFunctions.end(); itr++)
+		if (preCalc * *itr < 0){
+			bp.pagoda = *itr;
+			bp.hasPagoda = true;
+			pagodaFuncsMut.unlock();
+			return true;
+		}
 
+	pagodaFuncsMut.unlock();
 	return false;
 
 }
@@ -422,3 +491,8 @@ Pagoda::BoardPair Pagoda::create_random_board_pair(int i) const{
 
 	return b;
 }
+
+//void Pagoda::printSet(){
+//	for (auto itr = pagodaFunctions.begin(); itr != pagodaFunctions.end(); itr++)
+//		std::cout << *itr << std::endl;
+//}

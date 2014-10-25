@@ -60,6 +60,33 @@ Vector<T>& Vector<T>::operator=(Vector<T>&& rval){
 	return *this;
 }
 
+template<typename E>
+bool operator==(const Vector<E>& lhs, const Vector<E>& rhs){
+	if (lhs.size() != rhs.size()) return false;
+
+	for (int i=0; i<lhs.size(); ++i)
+		if (lhs[i] != rhs[i]) return false;
+
+	return true;
+}
+
+template<typename E>
+bool operator!=(const Vector<E>& lhs, const Vector<E>& rhs){
+	return !(lhs == rhs);
+}
+
+template<typename E>
+bool operator<(const Vector<E>& lhs, const Vector<E>& rhs){
+	if (lhs.size() < rhs.size()) return true;
+	if (rhs.size() < lhs.size()) return false;
+
+	for (int i=0; i<lhs.size(); ++i)
+		if (lhs[i] != rhs[i])
+			return lhs[i] < rhs[i];
+		
+	return false;
+}
+
 template<typename T>
 T Vector<T>::magnitude(){
 	E sum;
