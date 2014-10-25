@@ -21,9 +21,9 @@ int main(){
 
 		std::cout << "Program start. " << std::endl;
 
-		/*std::vector<Pagoda::BoardPair> boards;
+		std::vector<Pagoda::BoardPair> boards;
 		Pagoda p(true);
-		p.load_from_file("testDoubles.txt", boards);*/
+		p.load_from_file("testDoubles.txt", boards);
 
 
 		Matrix<int> mat(3, 3);
@@ -39,27 +39,32 @@ int main(){
 		b[0] = 1;
 		b[1] = 1;
 		b[2] = 1;
-		/*b[3] = 1;
-		b[4] = 1;*/
+		b[3] = 1;
+		b[4] = 1;
 
 		Vector<double> d(3);
 
 		d[0] = 0.4;
 		d[1] = 3.8;
 		d[2] = 6.7;
-		/*d[3] = 8.8;
-		d[4] = 0.3;*/
+		d[3] = 8.8;
+		d[4] = 0.3;
 
-		/*std::cout << b * d << std::endl;*/
-		/*std::cout << d * b << std::endl;*/
+		/*std::cout << p.verify_pagoda(d);*/
 
-		std::cout << a * d << std::endl;
+		///*std::cout << b * d << std::endl;*/
+		///*std::cout << d * b << std::endl;*/
 
-		//PagodaTester pt(8);
-		//pt.setLoad(true);
-		//pt.setSave(true);
-		//pt.setAccum(true);
-		//pt.setGenerateNewPags(true);
+		//std::cout << a * d << std::endl;
+
+		PagodaTester pt(8);
+		pt.setLoad(true);
+		pt.setSave(true);
+		pt.setAccum(true);
+		pt.setGenerateNewPags(false);
+
+		/*pt.sequentialTest(100000);*/
+		pt.ThreadedtestType2(10000000, 10);
 
 		///*std::cout << "Threaded test. " << std::endl;*/
 		///*pt.sequentialTest(100000);*/

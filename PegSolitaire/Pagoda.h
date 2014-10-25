@@ -27,7 +27,7 @@ public:
 	//TODO: Move the board pair constructors outside of pagoda?
 	struct BoardPair {
 		//A pair of start and end states, and a pointer to a pagoda function that solves them
-		Vector<int> pagoda;
+		Vector<double> pagoda;
 		Vector<int> startState;
 		Vector<int> endState;
 
@@ -38,7 +38,7 @@ public:
 
 		BoardPair(int size):
 			hasPagoda(false){
-				pagoda = Vector<int>();
+				pagoda = Vector<double>();
 				startState = Vector<int>(size);
 				endState = Vector<int>(size);
 		};
@@ -83,8 +83,8 @@ public:
 	std::ostream& printPagCom(std::ostream& os, const BoardPair& bp, const bool append = false);
 
 	//PAGODA
-	bool generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState, const bool saveResults = false);
-	bool verify_pagoda(const Vector<int>& pagoda, const bool saveResults = false);
+	bool generate_pagoda(Vector<double>& pagoda, const Vector<int>& endState, const bool saveResults = false);
+	bool verify_pagoda(const Vector<double>& pagoda, const bool saveResults = false);
 	
 	//Will just try to prove that your board is insolvable with the pagoda function
 	bool prove_insolvable(const BoardPair& bp);
@@ -115,8 +115,8 @@ private:
 	bool possibleGeneration;
 
 	//THIS ONLY STORES VALID PAGODA FUNCTIONS
-	std::set<Vector<int>> pagodaFunctions;
-	void savePagoda(const Vector<int>& pagoda);
+	std::set<Vector<double>> pagodaFunctions;
+	void savePagoda(const Vector<double>& pagoda);
 	std::mutex pagodaFuncsMut;
 
 	template<typename E>

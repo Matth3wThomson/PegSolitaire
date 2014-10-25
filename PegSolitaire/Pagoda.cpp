@@ -105,7 +105,7 @@ void Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>&
 		}
 
 		if (temp == "PAGODA:"){
-			bps.back().pagoda = Vector<int>(pegHoles);
+			bps.back().pagoda = Vector<double>(pegHoles);
 			bps.back().hasPagoda = true;
 			load_vector_from_board(file, bps.back().pagoda);
 
@@ -164,10 +164,10 @@ bool Pagoda::load_pagoda_functions(const std::string& filename){
 	if (!file.is_open()) return false;
 
 	while (!file.eof()){
-		Vector<int> temp(pegHoles);
-		load_vector_from_board(file, temp);
+		Vector<double> pagoda(pegHoles);
+		load_vector_from_board(file, pagoda);
 
-		pagodaFunctions.insert(temp);
+		pagodaFunctions.insert(pagoda);
 	}
 
 	file.close();
@@ -249,10 +249,10 @@ void Pagoda::print_vector_as_board(std::ostream& os, const Vector<E>& v){
 }
 
 //TODO: ACCESS YALE MATRIX MORE EFFICIENTLY
-bool Pagoda::generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState, bool saveResults){
+bool Pagoda::generate_pagoda(Vector<double>& pagoda, const Vector<int>& endState, bool saveResults){
 	if (possibleGeneration){
 
-	pagoda = Vector<int>(endState);
+	pagoda = Vector<double>(endState);
 
 	Vector<bool> fixedVector(pagoda.size()); //True if fixed, false if not. TODO: Native array?
 
@@ -304,14 +304,14 @@ bool Pagoda::generate_pagoda(Vector<int>& pagoda, const Vector<int>& endState, b
 
 	if (verify_pagoda(pagoda, saveResults))
 		return true;
-	else return false;
-
 	}
+
+	return false;
 }
 
-bool Pagoda::verify_pagoda(const Vector<int>& pagoda, const bool saveResults){
+bool Pagoda::verify_pagoda(const Vector<double>& pagoda, const bool saveResults){
 	//NO NEED TO TRANSPOSE! (Jump matrix is already in jump*location format)
-	Vector<int> x = (jumpMat * pagoda);
+	Vector<double> x = (jumpMat * pagoda);
 
 	for (int i=0; i<x.size(); ++i)
 		if (x[i] < 0) return false;
@@ -323,26 +323,29 @@ bool Pagoda::verify_pagoda(const Vector<int>& pagoda, const bool saveResults){
 	return true;
 };
 
-void Pagoda::savePagoda(const Vector<int>& pagoda){
+void Pagoda::savePagoda(const Vector<double>& pagoda){
 	pagodaFuncsMut.lock();
 	pagodaFunctions.insert(pagoda);
 	pagodaFuncsMut.unlock();
 }
 
 bool Pagoda::prove_insolvable(const BoardPair& bp){
-	return ((bp.startState - bp.endState)* bp.pagoda< 0);
+	return (bp.pagoda * (bp.startState - bp.endState) < 0);
 }
 
 bool Pagoda::prove_insolv_with_saved(BoardPair& bp){
 	Vector<int> preCalc = bp.startState - bp.endState;
-
-	if (bp.hasPagoda)
-		if (preCalc * bp.pagoda < 0)
+	
+	if (bp.hasPagoda){
+		double test = bp.pagoda * (bp.startState - bp.endState); //TODO: delete this shit
+		if (bp.pagoda * preCalc  < 0)
 			return true;
+
+	}
 
 	if (possibleGeneration) pagodaFuncsMut.lock();
 	for (auto itr = pagodaFunctions.begin(); itr != pagodaFunctions.end(); itr++)
-		if (preCalc * *itr < 0){
+		if (*itr * preCalc  < 0){
 			bp.pagoda = *itr;
 			bp.hasPagoda = true;
 			if (possibleGeneration) pagodaFuncsMut.unlock();

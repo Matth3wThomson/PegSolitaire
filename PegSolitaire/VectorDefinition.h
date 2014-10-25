@@ -60,6 +60,18 @@ Vector<T>& Vector<T>::operator=(Vector<T>&& rval){
 	return *this;
 }
 
+template<typename T>
+template<typename E>
+Vector<T>::Vector(const Vector<E>& rhs):
+	container_size(rhs.size()){
+
+		arr = new T[container_size];
+
+	for (int i=0; i<container_size; ++i){
+		arr[i] = rhs[i];
+	}
+}
+
 template<typename E>
 bool operator==(const Vector<E>& lhs, const Vector<E>& rhs){
 	if (lhs.size() != rhs.size()) return false;
@@ -80,10 +92,16 @@ bool operator<(const Vector<E>& lhs, const Vector<E>& rhs){
 	if (lhs.size() < rhs.size()) return true;
 	if (rhs.size() < lhs.size()) return false;
 
-	for (int i=0; i<lhs.size(); ++i)
+	/*for (int i=0; i<lhs.size(); ++i)
 		if (lhs[i] != rhs[i])
 			return lhs[i] < rhs[i];
-		
+	*/
+	for (int i=0; i<lhs.size(); ++i){
+		if (lhs[i] < rhs[i]) return true;
+		if (lhs[i] > rhs[i]) return false;
+	}
+
+
 	return false;
 }
 
