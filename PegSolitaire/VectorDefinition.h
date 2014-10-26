@@ -2,10 +2,10 @@
 
 template<typename T>
 Vector<T>::Vector(const int size):
-	container_size(size)
+	containerSize(size)
 {
-	this->arr = new T[container_size];
-	memset(this->arr, 0, (container_size * sizeof(T)));
+	this->arr = new T[containerSize];
+	memset(this->arr, 0, (containerSize * sizeof(T)));
 }
 
 template<typename T>
@@ -16,17 +16,17 @@ Vector<T>::~Vector(void)
 
 template<typename T>
 Vector<T>::Vector(const Vector<T>& rhs):
-	container_size(rhs.container_size)
+	containerSize(rhs.containerSize)
 {
-	arr = new T[container_size];
-	memcpy_s(arr, (container_size*sizeof(T)), rhs.arr, (container_size*sizeof(T)));
+	arr = new T[containerSize];
+	memcpy_s(arr, (containerSize*sizeof(T)), rhs.arr, (containerSize*sizeof(T)));
 }
 
 template<typename T>
 Vector<T>::Vector(Vector<T>&& rval):
-	arr(rval.arr), container_size(rval.container_size){
+	arr(rval.arr), containerSize(rval.containerSize){
 		rval.arr = 0;
-		rval.container_size = 0;
+		rval.containerSize = 0;
 }
 
 template<typename T>
@@ -36,18 +36,14 @@ Vector<T>& Vector<T>::operator=(const Vector<T>& rhs){
 	//Release old memory
 	delete[] arr;
 
-	this->container_size = rhs.container_size;
+	this->containerSize = rhs.containerSize;
 
 	//allocate new memory
-	arr = new T[container_size];
-	memset(this->arr, 0, (container_size * sizeof(T)));
+	arr = new T[containerSize];
+	memset(this->arr, 0, (containerSize * sizeof(T)));
 
 	//Copy Values
-	/*for (int i=0; i<rhs.container_size; ++i){
-		arr[i] = rhs.arr[i];
-	}*/
-
-	memcpy_s(arr, (container_size*sizeof(T)), rhs.arr, (container_size*sizeof(T)));
+	memcpy_s(arr, (containerSize*sizeof(T)), rhs.arr, (containerSize*sizeof(T)));
 
 	return *this;
 }
@@ -55,7 +51,7 @@ Vector<T>& Vector<T>::operator=(const Vector<T>& rhs){
 template<typename T>
 Vector<T>& Vector<T>::operator=(Vector<T>&& rval){
 	std::swap(arr, rval.arr);
-	std::swap(container_size, rval.container_size);
+	std::swap(containerSize, rval.containerSize);
 
 	return *this;
 }
@@ -63,11 +59,11 @@ Vector<T>& Vector<T>::operator=(Vector<T>&& rval){
 template<typename T>
 template<typename E>
 Vector<T>::Vector(const Vector<E>& rhs):
-	container_size(rhs.size()){
+	containerSize(rhs.size()){
 
-		arr = new T[container_size];
+		arr = new T[containerSize];
 
-	for (int i=0; i<container_size; ++i){
+	for (int i=0; i<containerSize; ++i){
 		arr[i] = rhs[i];
 	}
 }
@@ -92,15 +88,10 @@ bool operator<(const Vector<E>& lhs, const Vector<E>& rhs){
 	if (lhs.size() < rhs.size()) return true;
 	if (rhs.size() < lhs.size()) return false;
 
-	/*for (int i=0; i<lhs.size(); ++i)
-		if (lhs[i] != rhs[i])
-			return lhs[i] < rhs[i];
-	*/
 	for (int i=0; i<lhs.size(); ++i){
 		if (lhs[i] < rhs[i]) return true;
 		if (lhs[i] > rhs[i]) return false;
 	}
-
 
 	return false;
 }
@@ -108,7 +99,7 @@ bool operator<(const Vector<E>& lhs, const Vector<E>& rhs){
 template<typename T>
 T Vector<T>::magnitude(){
 	E sum;
-	for (int i=0; i<this->container_size; ++i)
+	for (int i=0; i<this->containerSize; ++i)
 		sum += (*this)[i] * (*this)[i];
 	
 	return sqrt(sum);
@@ -120,7 +111,7 @@ template<typename E>
 Vector<E> operator*(const Vector<E>& lhs, const E& rhs){
 	Vector<E> temp(lhs);
 	
-	for (int i=0; i<temp.container_size; ++i)
+	for (int i=0; i<temp.containerSize; ++i)
 		temp[i] *= rhs;
 
 	return temp;
@@ -131,15 +122,20 @@ Vector<E> operator*(const E& lhs, const Vector<E>& rhs){
 	return rhs * lhs;
 };
 
+template<typename T>
+Vector<T>& Vector<T>::operator*=(const T& rhs){
+	return *this = *this * rhs;
+}
+
 
 //Vector
 template<typename E>
 E operator*(const Vector<E>& lhs, const Vector<E>& rhs){
-	if (lhs.container_size != rhs.container_size) throw std::invalid_argument("Dot product requires vectors of equal size");
+	if (lhs.containerSize != rhs.containerSize) throw std::invalid_argument("Dot product requires vectors of equal size");
 
 	E value = E();
 
-	for (int i=0; i<rhs.container_size; ++i)
+	for (int i=0; i<rhs.containerSize; ++i)
 		value += lhs[i] * rhs[i];
 
 	return value;
@@ -147,11 +143,11 @@ E operator*(const Vector<E>& lhs, const Vector<E>& rhs){
 
 template<typename E, typename F>
 E operator*(const Vector<E>& lhs, const Vector<F>& rhs){
-	if (lhs.container_size != rhs.container_size) throw std::invalid_argument("Dot product requires vectors of equal size");
+	if (lhs.containerSize != rhs.containerSize) throw std::invalid_argument("Dot product requires vectors of equal size");
 
 	E value = E();
 
-	for (int i=0; i<rhs.container_size; ++i)
+	for (int i=0; i<rhs.containerSize; ++i)
 		value += lhs[i] * rhs[i];
 
 	return value;
@@ -159,12 +155,12 @@ E operator*(const Vector<E>& lhs, const Vector<F>& rhs){
 
 template<typename E>
 Vector<E> operator+(const Vector<E>& lhs, const Vector<E>& rhs){
-	if (lhs.container_size != rhs.container_size) throw 
+	if (lhs.containerSize != rhs.containerSize) throw 
 		std::invalid_argument("Vector addition requires equal length");
 
 	Vector<E> temp(lhs);
 
-	for (int i=0; i<rhs.container_size; ++i)
+	for (int i=0; i<rhs.containerSize; ++i)
 		temp[i] += rhs[i];
 
 	return temp;
@@ -177,12 +173,12 @@ Vector<T>& Vector<T>::operator+=(const Vector<T>& rhs){
 
 template<typename E>
 Vector<E> operator-(const Vector<E>& lhs, const Vector<E>& rhs){
-	if (lhs.container_size != rhs.container_size) 
+	if (lhs.containerSize != rhs.containerSize) 
 		throw std::invalid_argument("Vector addition requires equal length");
 
 	Vector<E> temp(lhs);
 
-	for (int i=0; i<rhs.container_size; ++i)
+	for (int i=0; i<rhs.containerSize; ++i)
 		temp[i] -= rhs[i];
 
 	return temp;
@@ -192,3 +188,10 @@ template<typename T>
 Vector<T>& Vector<T>::operator-=(const Vector<T>& rhs){
 	return *this = *this - rhs;
 };
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const Vector<T>& v){
+	for (int i=0; i<v.size(); ++i)
+			os << v[i] << ",";
+		return os;
+}

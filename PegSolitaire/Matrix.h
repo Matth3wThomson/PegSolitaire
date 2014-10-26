@@ -5,28 +5,23 @@
 #include <string>
 #include <stdexcept>
 #include "Vector.h"
-/*#include <stdlib.h>*/	//TODO: Work out if necessary
 
 #ifndef NULL
 #define NULL 0
 #endif
 
-/*TODO: 
-		-Do all operators for matrix class.
-		-Evaulate pass by reference used... Lots of matrices are bools (slower to pass 4 bytes than
-		 1 bit) 
-		-Test mathematical operators
-		-Implement vector/matrix functionality
-		-Make assignment operators more efficient
-
+/*
 NOTES:
 		-Performance of exceptions that arent thrown or caught identical to functions that dont throw,
 		 therefore exceptions used on functions where matrices must be of identical size, as program
 		 crash is desired. (BENCHMARK: 10000 valid add operations)
 		-Division of matrices not done since it is technically the multiplication of the inverse,
 		 and the inverse of a matrix isn't easy to compute!
-		-There are functions with duplicate purposes, this is simply to make the class easier to
-		 understand from outside the class
+		-There are functions with duplicate purposes, this is simply to make the class easier for a third
+		 party to understand its implementation
+		-Square brackets and at function implemented without safeguards purposefully, to make the class feel
+		 like a pass through/native matrix
+		-Move semantics have been implemented for this class to increase performance in creating copies.
 */
 
 
@@ -76,18 +71,18 @@ public:
 	Vector<T> operator*(const Vector<T>& rhs);
 
 	//Insertion
-	inline void set_element(const int x, const int y, const T& elem){ mat[x][y] = elem; };
+	inline void setElement(const int x, const int y, const T& elem){ mat[x][y] = elem; };
 
 	//Access
-	inline T& get_element(const int x, const int y){ return mat[x][y]; };
+	inline T& getElement(const int x, const int y){ return mat[x][y]; };
 	inline T* operator[](const int location) const{ return mat[location]; };
 
 	//Size operations
-	inline int get_x_dim() const{ return x; };
-	inline int get_y_dim() const{ return y; };
+	inline int getXDim() const{ return x; };
+	inline int getYDim() const{ return y; };
 
-	inline int get_height() const{ return x; };
-	inline int get_width() const { return y; };
+	inline int getHeight() const{ return x; };
+	inline int getWidth() const { return y; };
 
 	//Display
 	template<typename E>

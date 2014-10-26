@@ -105,12 +105,17 @@ Matrix<E> operator*(const E& lhs, const Matrix<E>& rhs){
 	return rhs * lhs;
 }
 
+template<typename T>
+Matrix<T>& Matrix<T>::operator*=(const T& rhs){
+	return *this = rhs * *this;
+}
+
 //MATRIX ARITHMETIC
 
 template<typename E>
 Matrix<E> operator*(const Matrix<E>& lhs, const Matrix<E>& rhs){
 
-	if (lhs.get_y_dim() != rhs.get_x_dim()) throw std::invalid_argument("MatrixMatrix multiply requires number of rows equal to columns");
+	if (lhs.getYDim() != rhs.getXDim()) throw std::invalid_argument("MatrixMatrix multiply requires number of rows equal to columns");
 
 	Matrix<E> result(lhs.x, rhs.y);
 
@@ -133,8 +138,8 @@ Matrix<E> operator+(const Matrix<E>& lhs, const Matrix<E>& rhs){
 
 	Matrix<E> temp(lhs);
 
-	for (int i=0; i<lhs.get_x_dim(); ++i)
-		for (int j=0; j<lhs.get_y_dim(); ++j)
+	for (int i=0; i<lhs.getXDim(); ++i)
+		for (int j=0; j<lhs.getYDim(); ++j)
 			temp[i][j] += rhs[i][j];
 	
 	return temp;
@@ -151,8 +156,8 @@ Matrix<E> operator-(const Matrix<E>& lhs, const Matrix<E>& rhs){
 
 	Matrix<E> temp(lhs);
 
-	for (int i=0; i<lhs.get_x_dim(); ++i)
-		for (int j=0; j<lhs.get_y_dim(); j++)
+	for (int i=0; i<lhs.getXDim(); ++i)
+		for (int j=0; j<lhs.getYDim(); j++)
 			temp[i][j] -= rhs[i][j];
 
 	return temp;
@@ -168,7 +173,7 @@ template<typename E>
 Vector<E> Matrix<E>::operator*(const Vector<E>& rhs){
 	if (this->y != rhs.size()) throw std::invalid_argument("Matrix/Vector multiplication requires same number of matrix columns to vector size");
 
-	Vector<E> temp(rhs.size());
+	Vector<E> temp(this->x);
 
 	for (int i=0; i<this->x; ++i)
 		for (int j=0; j<this->y; ++j)

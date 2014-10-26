@@ -74,7 +74,7 @@ YaleMatrix<T>& YaleMatrix<T>::operator=(YaleMatrix<T>&& rval){
 //to be large (33*n) where n>30, a vector was used.
 template<typename T>
 YaleMatrix<T>::YaleMatrix(const Matrix<T>& verbose):
-	x(verbose.get_x_dim()+1), y(verbose.get_y_dim()){
+	x(verbose.getXDim()+1), y(verbose.getYDim()){
 
 
 		//TODO: What if the matrix passed is 0x0
@@ -87,8 +87,8 @@ YaleMatrix<T>::YaleMatrix(const Matrix<T>& verbose):
 		int indexCounter = 0;
 
 		//For all locations in the matrix
-		for (int i=0; i<verbose.get_x_dim(); ++i){
-			for (int j=0; j<verbose.get_y_dim(); ++j)
+		for (int i=0; i<verbose.getXDim(); ++i){
+			for (int j=0; j<verbose.getYDim(); ++j)
 				if (verbose[i][j]){
 					//If there exists an element
 					//Add it to the vector of elements we know of
@@ -158,7 +158,7 @@ Vector<E> operator*(const YaleMatrix<E>& lhs, const Vector<E>& rhs){
 	if (lhs.y != rhs.size()) throw 
 		std::invalid_argument("Matrix/Vector multiplication requires same number of matrix columns to vector size");
 
-	Vector<E> temp(lhs.get_x_dim());
+	Vector<E> temp(lhs.getXDim());
 
 	//For each possible row
 	for (int i=0; i<lhs.x-1; ++i)
@@ -176,7 +176,7 @@ Vector<F> operator*(const YaleMatrix<E>& lhs, const Vector<F>& rhs){
 	if (lhs.y != rhs.size()) throw 
 		std::invalid_argument("Matrix/Vector multiplication requires same number of matrix columns to vector size");
 
-	Vector<F> temp(lhs.get_x_dim());
+	Vector<F> temp(lhs.getXDim());
 
 	//For each possible row
 	for (int i=0; i<lhs.x-1; ++i)

@@ -3,14 +3,14 @@
 
 Pagoda::Pagoda(bool eng){
 	//Create board
-	if (eng) board = Solitaire::CreateEngBoard();
-	else board = Solitaire::CreateEurBoard();
+	if (eng) board = Solitaire::createEngBoard();
+	else board = Solitaire::createEurBoard();
 
 	//Create the index matrix and count number of pegholes
-	pegHoles = Solitaire::CreateIndexMat(indexMat, board);
+	pegHoles = Solitaire::createIndexMat(indexMat, board);
 
 	//Create the jump matrix
-	jumpMat = Solitaire::CreateJumpMat(board, indexMat, pegHoles);
+	jumpMat = Solitaire::createJumpMat(board, indexMat, pegHoles);
 
 }
 
@@ -18,8 +18,8 @@ Pagoda::Pagoda(const Matrix<bool>& boardShape)
 {
 	board = boardShape;
 
-	pegHoles = Solitaire::CreateIndexMat(indexMat, board);
-	jumpMat = Solitaire::CreateJumpMat(board, indexMat, pegHoles);
+	pegHoles = Solitaire::createIndexMat(indexMat, board);
+	jumpMat = Solitaire::createJumpMat(board, indexMat, pegHoles);
 }
 
 Pagoda::Pagoda(const Pagoda& rhs){
@@ -48,8 +48,8 @@ Pagoda::~Pagoda(void)
 {
 }
 
-//TODO: Flexibility?
-void Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>& bps){
+
+void Pagoda::loadFromFile(const std::string& filename, std::vector<BoardPair>& bps){
 	std::ifstream file = std::ifstream();
 
 	file.open(filename.c_str());
@@ -58,8 +58,10 @@ void Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>&
 	std::string temp;
 	file >> temp;
 
+	//Keep going until we reach the end of the file
 	while (!file.eof()){
 
+		//The following must be the definition of a board
 		if (temp == "WIDTH"){
 
 			int width, height;
@@ -75,6 +77,7 @@ void Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>&
 			board = Matrix<bool>(height, width);
 			file >> temp;
 
+			//Loop through information given to load in the board
 			for (int i=0; i<height; ++i){
 				for (int j=0; j<width; ++j){
 					file >> temp;
@@ -84,30 +87,32 @@ void Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>&
 				}
 			}
 
-			pegHoles = Solitaire::CreateIndexMat(indexMat, board);
-			jumpMat = Solitaire::CreateJumpMat(board, indexMat, pegHoles);
+			pegHoles = Solitaire::createIndexMat(indexMat, board);
+			jumpMat = Solitaire::createJumpMat(board, indexMat, pegHoles);
 
 			file >> temp;
 		}
 
-
+		//The following is a definition of a start and end state
 		if (temp == "START:"){
 			bps.push_back(BoardPair(pegHoles));
-			load_vector_from_board(file, bps.back().startState);
+			loadVectorFromBoard(file, bps.back().startState);
 
 			file >> temp;
 		}
 
+		//The following is a definition of an end state
 		if (temp == "END:"){
-			load_vector_from_board(file, bps.back().endState);
+			loadVectorFromBoard(file, bps.back().endState);
 
 			file >> temp;
 		}
 
+		//The following is a definition of a pagoda
 		if (temp == "PAGODA:"){
 			bps.back().pagoda = Vector<double>(pegHoles);
 			bps.back().hasPagoda = true;
-			load_vector_from_board(file, bps.back().pagoda);
+			loadVectorFromBoard(file, bps.back().pagoda);
 
 			file >> temp;
 		}
@@ -117,16 +122,17 @@ void Pagoda::load_from_file(const std::string& filename, std::vector<BoardPair>&
 	file.close();
 }
 
-//TODO: These functions dont request that vectors be of the correct length
+//Taking a given stream containing a matrix of a vector, this function creates a vecor from it,
+//storing it in the one supplied
 template<typename E>
-void Pagoda::load_vector_from_board(std::istream& is, Vector<E>& v){
+void Pagoda::loadVectorFromBoard(std::istream& is, Vector<E>& v){
 
 	if (v.size() != pegHoles) throw std::invalid_argument("Cannot load vector from board. Vector must have correct size");
 
 	char getme;
 
-	for (int i=0; i<board.get_x_dim(); ++i){
-		for (int j=0; j<board.get_y_dim(); ++j){
+	for (int i=0; i<board.getXDim(); ++i){
+		for (int j=0; j<board.getYDim(); ++j){
 			if (board[i][j])
 				is >> v[indexMat[i][j]];
 			is >> getme;
@@ -135,7 +141,8 @@ void Pagoda::load_vector_from_board(std::istream& is, Vector<E>& v){
 
 }
 
-bool Pagoda::save_pagoda_functions(const std::string& filename){
+//This function saves all stored unique pagodas to a file supplied
+bool Pagoda::savePagodaFunctions(const std::string& filename){
 
 	std::cout << "Saving pagodas found to: '" << filename << "'." << std::endl;
 
@@ -154,7 +161,8 @@ bool Pagoda::save_pagoda_functions(const std::string& filename){
 	return true;
 }
 
-bool Pagoda::load_pagoda_functions(const std::string& filename){
+//This function loads all stored pagodas into our set of pagodas
+bool Pagoda::loadPagodaFunctions(const std::string& filename){
 
 	std::cout << "Loading pagodas from: '" << filename << "'." << std::endl;
 	std::ifstream file;
@@ -165,7 +173,7 @@ bool Pagoda::load_pagoda_functions(const std::string& filename){
 
 	while (!file.eof()){
 		Vector<double> pagoda(pegHoles);
-		load_vector_from_board(file, pagoda);
+		loadVectorFromBoard(file, pagoda);
 
 		pagodaFunctions.insert(pagoda);
 	}
@@ -175,7 +183,8 @@ bool Pagoda::load_pagoda_functions(const std::string& filename){
 	return true;
 }
 
-bool Pagoda::print_to_file(const std::string& filename, const BoardPair& bp, bool append){
+//This prints a board pair to file, appending to the end if the boolean append is set.
+bool Pagoda::printToFile(const std::string& filename, const BoardPair& bp, bool append){
 	std::ofstream file = std::ofstream();
 
 	if (append)
@@ -185,19 +194,21 @@ bool Pagoda::print_to_file(const std::string& filename, const BoardPair& bp, boo
 
 	if (!file.is_open()) return false;
 
-	printPagCom(file, bp, append);
+	printBoardPair(file, bp, append);
 	file.close();
 
 	return true;
 }
 
+//This outputs the pagoda class to a given outstream.
+//this only contains board information.
 std::ostream& operator<<(std::ostream& os, const Pagoda& p){
-	os << "WIDTH " << p.board.get_width() << std::endl;
-	os << "HEIGHT " << p.board.get_height() << std::endl;
+	os << "WIDTH " << p.board.getWidth() << std::endl;
+	os << "HEIGHT " << p.board.getHeight() << std::endl;
 	os << "BOARD: " << std::endl;
 
-	for (int i=0; i<p.board.get_x_dim(); ++i){
-		for (int j=0; j<p.board.get_y_dim(); ++j)
+	for (int i=0; i<p.board.getXDim(); ++i){
+		for (int j=0; j<p.board.getYDim(); ++j)
 			(p.board[i][j]) ? os << "T " : os << "F ";
 
 		os << std::endl;
@@ -206,15 +217,16 @@ std::ostream& operator<<(std::ostream& os, const Pagoda& p){
 	return os;
 }
 
-std::ostream& Pagoda::printPagCom(std::ostream& os, const Pagoda::BoardPair& bp, const bool append){
+//This function prints a given board pair to file. If append is set to true, the board is not printed
+std::ostream& Pagoda::printBoardPair(std::ostream& os, const Pagoda::BoardPair& bp, const bool append){
 
 	if (!append){
-		os << "WIDTH " << this->board.get_width() << std::endl;
-		os << "HEIGHT " << this->board.get_height() << std::endl;
+		os << "WIDTH " << this->board.getWidth() << std::endl;
+		os << "HEIGHT " << this->board.getHeight() << std::endl;
 		os << "BOARD: " << std::endl;
 
-		for (int i=0; i<this->board.get_x_dim(); ++i){
-			for (int j=0; j<this->board.get_y_dim(); ++j)
+		for (int i=0; i<this->board.getXDim(); ++i){
+			for (int j=0; j<this->board.getYDim(); ++j)
 				(this->board[i][j]) ? os << "T " : os << "F ";
 
 			os << std::endl;
@@ -236,9 +248,10 @@ std::ostream& Pagoda::printPagCom(std::ostream& os, const Pagoda::BoardPair& bp,
 }
 
 template<typename E>
+//This function prints a vector in the shape of the pagoda classes stored board
 void Pagoda::print_vector_as_board(std::ostream& os, const Vector<E>& v){
-	for (int i=0; i<this->board.get_x_dim(); ++i){
-		for (int j=0; j<this->board.get_y_dim(); ++j)
+	for (int i=0; i<this->board.getXDim(); ++i){
+		for (int j=0; j<this->board.getYDim(); ++j)
 			if (this->board[i][j])
 				os << v[this->indexMat[i][j]] << ",";
 			else 
@@ -248,69 +261,72 @@ void Pagoda::print_vector_as_board(std::ostream& os, const Vector<E>& v){
 	}
 }
 
-//TODO: ACCESS YALE MATRIX MORE EFFICIENTLY
-bool Pagoda::generate_pagoda(Vector<double>& pagoda, const Vector<int>& endState, bool saveResults){
+
+bool Pagoda::generatePagoda(Vector<double>& pagoda, const Vector<int>& endState, bool saveResults){
+	//Only attempt to generate if generation mode is on. (Part of work around for lack of sharable locks)
 	if (possibleGeneration){
 
-	pagoda = Vector<double>(endState);
+		//Make the pagoda equal to our endState
+		pagoda = Vector<double>(endState);
 
-	Vector<bool> fixedVector(pagoda.size()); //True if fixed, false if not. TODO: Native array?
+		Vector<bool> fixedVector(pagoda.size()); //True if fixed, false if not.
 
-	//Brute force?
+		//For each row of the jump matrix
+		for (int i=0; i<jumpMat.getXDim(); ++i){
 
-	//For each row of the jump matrix
-	for (int i=0; i<jumpMat.get_x_dim(); ++i){
+			int jumpIndices[3];
+			int index = 0;
 
-		int jumpIndices[3];
-		int index = 0;
+			//Find the indices of stateVector which are part of this row's jump
+			for (int j=0; j<jumpMat.getYDim(); ++j){
+				if (jumpMat.at(i,j)) //If this is an index
+					if (jumpMat.at(i,j) == -1)	//If this is the landing spot (Z)
+						jumpIndices[2] = j;
+					else jumpIndices[index++] = j; //Else this is jumped from or over (X or Y)
+			}
 
-		//Find the indices of stateVector which are part of this row's jump
-		for (int j=0; j<jumpMat.get_y_dim(); ++j){
-			if (jumpMat.at(i,j)) //If this is an index
-				if (jumpMat.at(i,j) == -1)	//If this is the landing spot (Z)
-					jumpIndices[2] = j;
-				else jumpIndices[index++] = j; //Else this is jumped from or over (X or Y)
-		}
+			//Jump indices now contains all of the indices into a stateVector where there is a jump present
+			if (pagoda[jumpIndices[0]] + pagoda[jumpIndices[1]] < pagoda[jumpIndices[2]]){
+				//We have found a jump which does not solve the inequality
+				//X + Y >= Z
 
-		//Jump indices now contains all of the indices into a stateVector where there is a jump present
-		if (pagoda[jumpIndices[0]] + pagoda[jumpIndices[1]] < pagoda[jumpIndices[2]]){
-			//We have found a jump which does not solve the inequality
-			//X + Y >= Z
+				//Lambda solveInequality for modifying a property until the inequality is solved
+				auto solveInequality = [&] (int indexToMod, bool grow){
 
-			//Lambda solveInequality for modifying a property until the inequality is solved
-			auto solveInequality = [&] (int indexToMod, bool grow){
+					while (pagoda[jumpIndices[0]] + pagoda[jumpIndices[1]] < pagoda[jumpIndices[2]]){
+						if (grow) pagoda[jumpIndices[indexToMod]]++;
+						else pagoda[jumpIndices[indexToMod]]--;
+					}
 
-				while (pagoda[jumpIndices[0]] + pagoda[jumpIndices[1]] < pagoda[jumpIndices[2]]){
-					if (grow) pagoda[jumpIndices[indexToMod]]++;
-					else pagoda[jumpIndices[indexToMod]]--;
+					//Let the fixed vector know that you have fixed a value
+					fixedVector[jumpIndices[indexToMod]] = true;
+				};
+
+
+				if (!fixedVector[jumpIndices[2]]){ //Z value not fixed yet
+					solveInequality(2, false); //Fix Z
+				}	else if (!fixedVector[jumpIndices[1]]){ //Y value not fixed yet
+					solveInequality(1, true); //Fix Y
+				}	else if (!fixedVector[jumpIndices[0]]){ //X value not fixed yet
+					solveInequality(0, true); //Fix X
+				} else {
+					return false;
 				}
-
-				//Let the fixed vector know that you have fixed a value
-				fixedVector[jumpIndices[indexToMod]] = true;
-			};
-
-
-			if (!fixedVector[jumpIndices[2]]){ //Z value not fixed yet
-				solveInequality(2, false); //Fix Z
-			}	else if (!fixedVector[jumpIndices[1]]){ //Y value not fixed yet
-				solveInequality(1, true); //Fix Y
-			}	else if (!fixedVector[jumpIndices[0]]){ //X value not fixed yet
-				solveInequality(0, true); //Fix X
-			} else {
-				return false;
 			}
 		}
-	}
 
-	if (verify_pagoda(pagoda, saveResults))
-		return true;
+		//After we have finished creating, determine if it is a valid pagoda
+		if (verifyPagoda(pagoda, saveResults))
+			return true;
 	}
 
 	return false;
 }
 
-bool Pagoda::verify_pagoda(const Vector<double>& pagoda, const bool saveResults){
-	//NO NEED TO TRANSPOSE! (Jump matrix is already in jump*location format)
+//This function will determine if the pagoda passed is valid. If save results is true
+// it will attempt to save the pagoda into the set of known pagodas
+bool Pagoda::verifyPagoda(const Vector<double>& pagoda, const bool saveResults){
+	
 	Vector<double> x = (jumpMat * pagoda);
 
 	for (int i=0; i<x.size(); ++i)
@@ -325,17 +341,23 @@ bool Pagoda::verify_pagoda(const Vector<double>& pagoda, const bool saveResults)
 
 void Pagoda::savePagoda(const Vector<double>& pagoda){
 	pagodaFuncsMut.lock();
-	pagodaFunctions.insert(pagoda);
+	pagodaFunctions.insert(pagoda); //Locks the pagoda function set to insert a pagoda
 	pagodaFuncsMut.unlock();
 }
 
-bool Pagoda::prove_insolvable(const BoardPair& bp){
-	return (bp.pagoda * (bp.startState - bp.endState) < 0);
+//Determine if a supplied board pair and its partnering pagoda prove insolvability
+bool Pagoda::proveInsolvable(const BoardPair& bp){
+	if (bp.hasPagoda)
+		return (bp.pagoda * (bp.startState - bp.endState) < 0);
+
+	return false;
 }
 
-bool Pagoda::prove_insolv_with_saved(BoardPair& bp){
+//Attempts to solve the board pair with its stored pagoda (if it has one) and if not
+//uses all stored pagodas to solve
+bool Pagoda::proveInsolvWithSaved(BoardPair& bp){
 	Vector<int> preCalc = bp.startState - bp.endState;
-	
+
 	if (bp.hasPagoda){
 		double test = bp.pagoda * (bp.startState - bp.endState); //TODO: delete this shit
 		if (bp.pagoda * preCalc  < 0)
@@ -352,16 +374,16 @@ bool Pagoda::prove_insolv_with_saved(BoardPair& bp){
 			return true;
 		}
 
-	if (possibleGeneration) pagodaFuncsMut.unlock();
-	return false;
+		if (possibleGeneration) pagodaFuncsMut.unlock();
+		return false;
 
 }
 
-//TODO: use true random?
-Vector<int> Pagoda::create_random_state_vector(const Matrix<bool>& board){
+//Creates a random state vector given a board
+Vector<int> Pagoda::createRandomStateVector(const Matrix<bool>& board){
 	int count = 0;
-	for (int i=0; i<board.get_x_dim(); ++i)
-		for (int j=0; j<board.get_y_dim(); ++j)
+	for (int i=0; i<board.getXDim(); ++i)
+		for (int j=0; j<board.getYDim(); ++j)
 			if (board[i][j]) ++count;	
 
 	Vector<int> temp(count);
@@ -371,10 +393,9 @@ Vector<int> Pagoda::create_random_state_vector(const Matrix<bool>& board){
 	return temp;
 }
 
-//TODO: Passing out a board pair means creating a copy.
-//There are lots of places where the copy constructor of board pair is called....
-//Implement a move constructor for it?
-Pagoda::BoardPair Pagoda::create_random_board_pair(int i) const{
+
+//Creates a random board pair given an integer based on the spec. for this coursework.
+Pagoda::BoardPair Pagoda::createRandomBoardPair(int i) const{
 
 	//Start configurations of 33-i pegs
 	//End configurations of i pegs
@@ -415,8 +436,3 @@ Pagoda::BoardPair Pagoda::create_random_board_pair(int i) const{
 
 	return b;
 }
-
-//void Pagoda::printSet(){
-//	for (auto itr = pagodaFunctions.begin(); itr != pagodaFunctions.end(); itr++)
-//		std::cout << *itr << std::endl;
-//}

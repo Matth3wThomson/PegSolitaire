@@ -26,8 +26,8 @@ public:
 
 	T at(int x, int y);
 
-	int get_x_dim() const{ return x-1; };
-	int get_y_dim() const{ return y; };
+	int getXDim() const{ return x-1; };
+	int getYDim() const{ return y; };
 	int get_NNZ() const{ return IA[x-1]; };
 
 
